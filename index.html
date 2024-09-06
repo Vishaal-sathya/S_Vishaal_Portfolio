@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    <!--- basic page needs
+    ================================================== -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>S Vishaal</title>
+
+    <script>
+      document.documentElement.classList.remove("no-js");
+      document.documentElement.classList.add("js");
+    </script>
+
+    <!-- CSS
+    ================================================== -->
+    <link rel="stylesheet" href="css/vendor.css" />
+    <link rel="stylesheet" href="css/styles.css" />
+
+    <!-- favicons
+    ================================================== -->
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="images\my images\title_logo.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="images\my images\title_logo.png"
+    />
+    <link rel="manifest" href="site.webmanifest" />
+  </head>
+
+  <body id="top">
+    <!-- preloader
+    ================================================== -->
+    <div id="preloader">
+      <div id="loader" class="dots-fade">
+        <div></div>
+        <div></div>
+        <div></div>
+      </div>
+    </div>
+
+    <!-- page wrap
+    ================================================== -->
+    <div id="page" class="s-pagewrap">
+      <!-- # site header 
+        ================================================== -->
+      <header class="s-header">
+        <div class="row s-header__inner">
+          <div class="s-header__block">
+            <div class="s-header__logo">
+              <a class="logo" href="index.html">
+                <img src="images/my images/logo.png" alt="Homepage" />
+              </a>
+            </div>
+
+            <a class="s-header__menu-toggle" href="#0"><span>Menu</span></a>
+          </div>
+          <!-- end s-header__block -->
+
+          <nav class="s-header__nav">
+            <ul class="s-header__menu-links">
+              <li class="current">
+                <a class="smoothscroll" href="#intro">Intro</a>
+              </li>
+              <li><a class="smoothscroll" href="#skills">Skills</a></li>
+              <li><a class="smoothscroll" href="#works">Works</a></li>
+              <li><a class="smoothscroll" href="#about">About</a></li>
+              <li><a class="smoothscroll" href="#footer">Contact</a></li>
+            </ul>
+            <!-- s-header__menu-links -->
+          </nav>
+          <!-- end s-header__nav -->
+        </div>
+        <!-- end s-header__inner -->
+      </header>
+      <!-- end s-header -->
+
+      <!-- # intro
+        ================================================== -->
+      <section id="intro" class="s-intro target-section">
+        <div class="row s-intro__content width-sixteen-col">
+          <div class="column lg-12 s-intro__content-inner grid-block grid-16">
+            <div class="s-intro__content-text">
+              <div class="s-intro__content-pretitle text-pretitle">Hello</div>
+              <h1 class="s-intro__content-title">
+                I'm S Vishaal <br />
+                aspiring data analyst and ML engineer.
+              </h1>
+
+              <div class="s-intro__content-btns">
+                <a class="smoothscroll btn" href="#skills">My Expertise</a>
+                <a class="smoothscroll btn btn--stroke" href="#footer"
+                  >Get In Touch</a
+                >
+              </div>
+              <!-- s-intro__content-btns -->
+            </div>
+            <!-- s-intro__content-text -->
+          </div>
+          <!-- s-intro__content-inner -->
+        </div>
+        <!-- s-intro__content -->
+
+        <ul class="s-intro__social social-list">
+          <li>
+            <a href="https://www.linkedin.com/in/vishaal-s-52686b294/">
+              <img
+                src="images/socials/linkedin.png"
+                alt="linkedin"
+                width="24"
+                height="24"
+              />
+              <span class="u-screen-reader-text">Linkedin</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://github.com/Vishaal-sathya">
+              <img
+                src="images\socials\git.png"
+                alt="github"
+                width="24"
+                height="24"
+              />
+              <span class="u-screen-reader-text">Github</span>
+            </a>
+          </li>
+        </ul>
+
+        <!-- end s-intro__social -->
+
+        <div class="s-intro__content-media">
+          <img
+            src="images/intro-bg.jpg"
+            srcset="images/intro-bg.jpg 1x, images/intro-bg.jpg 2x"
+            alt=""
+          />
+        </div>
+        <!-- s-intro__content-media -->
+
+        <div class="s-intro__btn-download">
+          <a class="btn btn--stroke" href="Vishaal S Resume.pdf" download
+            >Get My CV</a
+          >
+        </div>
+        <!-- end s-intro__btn-download -->
+
+        <div class="s-intro__scroll-down">
+          <a href="#about" class="smoothscroll">
+            <div class="scroll-icon">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                style="fill: rgba(0, 0, 0, 1)"
+              >
+                <path
+                  d="M11.178 19.569a.998.998 0 0 0 1.644 0l9-13A.999.999 0 0 0 21 5H3a1.002 1.002 0 0 0-.822 1.569l9 13z"
+                ></path>
+              </svg>
+            </div>
+            <span class="scroll-text u-screen-reader-text">Scroll Down</span>
+          </a>
+        </div>
+        <!-- s-intro__scroll-down -->
+      </section>
+      <!-- end s-intro -->
+
+      <!-- # Skills
+        ================================================== -->
+
+      <section id="skills" class="skill-section target-section">
+        <div class="row">
+          <div class="column xl-12">
+            <div class="section-header" data-num="02">
+              <h2 class="text-display-title">My Skills.</h2>
+            </div>
+            <div class="skills-grid">
+              <div class="skill-item">
+                <img src="images/skills/powerbi.png" alt="Power BI" />
+                <p>Power BI</p>
+                <div class="hover-info">
+                  <ul>
+                    <li>
+                      <!-- <span>Data Modeling</span>
+                      <span>ETL</span>
+                      <span>DAX</span>
+                      <span>Dashboards</span> -->
+                      Data Modeling
+                    </li>
+                    <li>ETL</li>
+
+                    <li>DAX</li>
+                    <li>Dashboards</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="divider"></div>
+              <div class="skill-item">
+                <img src="images/skills/excel.png" alt="MS Excel" />
+                <p>MS Excel</p>
+                <div class="hover-info">
+                  <ul>
+                    <li>Conditional Formatting</li>
+                    <li>Data Validation</li>
+                    <li>Power Query & Power Pivot</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="divider"></div>
+              <div class="skill-item">
+                <img src="images/skills/sql.png" alt="SQL" />
+                <p>SQL</p>
+                <div class="hover-info">
+                  <ul>
+                    <li>Aggregate</li>
+                    <li>Subquery</li>
+                    <li>CTE and Joins</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="horizontal-divider" style="margin: 0px"></div>
+
+            <div class="skills-grid">
+              <div class="skill-item">
+                <img src="images/skills/ml.png" alt="Machine Learning" />
+                <p>Machine Learning</p>
+                <div class="hover-info">
+                  <ul>
+                    <li>Regression</li>
+                    <li>Classification</li>
+                    <li>Clustering</li>
+                    <li>Ensemble</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="divider"></div>
+              <div class="skill-item">
+                <img src="images/skills/dl.png" alt="Deep Learning" />
+                <p>Deep Learning</p>
+                <div class="hover-info">
+                  <ul>
+                    <li>CNN</li>
+                    <li>NLP</li>
+                    <li>Object Detection</li>
+                    <li>Segmentation</li>
+                    <li>Classification</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="divider"></div>
+              <div class="skill-item">
+                <img src="images/skills/python.png" alt="Python" />
+                <p>Python</p>
+                <div class="hover-info">
+                  <ul>
+                    <li>Object Oriented Programming</li>
+                    <li>Data Structures</li>
+                    <li>Numpy & Pandas</li>
+                    <li>Matplotlib & Seaborn</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- end skills -->
+
+      <!-- # works
+        ================================================== -->
+      <section id="works" class="s-works target-section">
+        <div class="row">
+          <div class="column xl-12">
+            <div class="section-header" data-num="03">
+              <h2 class="text-display-title">My Works.</h2>
+            </div>
+            <!-- end section-header -->
+          </div>
+        </div>
+
+        <div class="row folio-entries">
+          <div class="column entry">
+            <a
+              href="images/folio/lifeline.png"
+              class="entry__link glightbox"
+              data-glightbox="title: Will the number of deployed nodes be sufficient?; description: .entry__desc-01"
+            >
+              <div class="entry__thumb">
+                <img
+                  src="images/folio/lifeline.png"
+                  srcset="
+                    images/folio/lifeline.png 1x,
+                    images/folio/lifeline.png 2x
+                  "
+                  alt=""
+                />
+              </div>
+              <div class="entry__info">
+                <h4 class="entry__title">Feasibility Analysis</h4>
+                <div class="entry__cat">LifeLine Communications</div>
+              </div>
+            </a>
+
+            <div class="glightbox-desc entry__desc-01">
+              <p>
+                LifeLine is an independent communications network used during
+                disaster. It requires there to be atleast one node within a 2Km
+                radius. This analysis is about the posibility of the formation
+                of the network keeping in mind the raidus limitation.
+                <a href="https://www.behance.net/">Project Link</a>.
+              </p>
+            </div>
+          </div>
+          <!-- entry -->
+
+          <div class="column entry">
+            <a
+              href="images/folio/ship.png"
+              class="entry__link glightbox"
+              data-glightbox="title: Where is the revenue lacking?; description: .entry__desc-02"
+            >
+              <div class="entry__thumb">
+                <img
+                  src="images/folio/ship.png"
+                  srcset="images/folio/ship.png 1x, images/folio/ship.png 2x"
+                  alt=""
+                />
+              </div>
+              <div class="entry__info">
+                <h4 class="entry__title">Business Analysis</h4>
+                <div class="entry__cat">Sales and Shipping</div>
+              </div>
+            </a>
+
+            <div class="glightbox-desc entry__desc-02">
+              <p>
+                This analysis is about the sales of the organisation with
+                respect to different factors like categories, geography,
+                employees and shipping details.
+                <a href="https://www.behance.net/">Project Link</a>.
+              </p>
+            </div>
+          </div>
+          <!-- entry -->
+
+          <div class="column entry">
+            <a
+              href="images/folio/call.png"
+              class="entry__link glightbox"
+              data-glightbox="title: Who is the best employee and who needs to improve?; description: .entry__desc-03"
+            >
+              <div class="entry__thumb">
+                <img
+                  src="images/folio/call.png"
+                  srcset="images/folio/call.png 1x, images/folio/call.png 2x"
+                  alt=""
+                />
+              </div>
+              <div class="entry__info">
+                <h4 class="entry__title">HR Dashboard</h4>
+                <div class="entry__cat">Employee Performance Analysis</div>
+              </div>
+            </a>
+
+            <div class="glightbox-desc entry__desc-03">
+              <p>
+                This analysis dives deep into the performance of the employees
+                in a firm and net revenue brought in by each one of them through
+                deals.
+                <a href="https://www.behance.net/">Project Link</a>.
+              </p>
+            </div>
+          </div>
+          <!-- entry -->
+
+          <div class="column entry">
+            <a
+              href="images/folio/hospital.png"
+              class="entry__link glightbox"
+              data-glightbox="title: Which sector needs better patient management?; description: .entry__desc-04"
+            >
+              <div class="entry__thumb">
+                <img
+                  src="images/folio/hospital.png"
+                  srcset="
+                    images/folio/hospital.png 1x,
+                    images/folio/hospital.png 2x
+                  "
+                  alt=""
+                />
+              </div>
+              <div class="entry__info">
+                <h4 class="entry__title">Hospital Management</h4>
+                <div class="entry__cat">Patient Waitlist Analysis</div>
+              </div>
+            </a>
+
+            <div class="glightbox-desc entry__desc-04">
+              <p>
+                This is an analysis about the average waiting time for patients
+                in an hospital. It seeks to provide the in depth analysis of
+                waitlist for each department in the hospital.
+                <a href="https://www.behance.net/">Project Link</a>.
+              </p>
+            </div>
+          </div>
+          <!-- entry -->
+
+          <div class="column entry">
+            <a
+              href="images/folio/amazon.png"
+              class="entry__link glightbox"
+              data-glightbox="title: Which product is the best and which one performs below average?; description: .entry__desc-05"
+            >
+              <div class="entry__thumb">
+                <img
+                  src="images/folio/amazon.png"
+                  srcset="
+                    images/folio/amazon.png 1x,
+                    images/folio/amazon.png 2x
+                  "
+                  alt=""
+                />
+              </div>
+              <div class="entry__info">
+                <h4 class="entry__title">Sales Analysis</h4>
+                <div class="entry__cat">Amazon</div>
+              </div>
+            </a>
+
+            <div class="glightbox-desc entry__desc-05">
+              <p>
+                This is a complete analysis of the sales of each and every
+                product category in amazon and the performance and net revenue
+                of said product categories.
+                <a href="https://www.behance.net/">Project Link</a>.
+              </p>
+            </div>
+          </div>
+          <!-- entry -->
+
+          <div class="column entry">
+            <a
+              href="images/folio/netflix.png"
+              class="entry__link glightbox"
+              data-glightbox="title: Frequency of TV shows and movies over time; description: .entry__desc-06"
+            >
+              <div class="entry__thumb">
+                <img
+                  src="images/folio/netflix.png"
+                  srcset="
+                    images/folio/netflix.png 1x,
+                    images/folio/netflix.png 2x
+                  "
+                  alt=""
+                />
+              </div>
+              <div class="entry__info">
+                <h4 class="entry__title">Trend Analysis</h4>
+                <div class="entry__cat">Netflix</div>
+              </div>
+            </a>
+
+            <div class="glightbox-desc entry__desc-06">
+              <p>
+                This is a high level analysis of the trends in the popularity
+                and hosting of tv shows and and movies on netflix over time.
+                <a href="https://www.behance.net/">Project Link</a>.
+              </p>
+            </div>
+          </div>
+          <!-- entry -->
+
+          <div class="column entry">
+            <a
+              href="images/folio/eyetalk.png"
+              class="entry__link glightbox"
+              data-glightbox="title: Communcation aid for paralysis patients; description: .entry__desc-07"
+            >
+              <div class="entry__thumb">
+                <img
+                  src="images/folio/eyetalk.png"
+                  srcset="
+                    images/folio/eyetalk.png 1x,
+                    images/folio/eyetalk.png 2x
+                  "
+                  alt=""
+                />
+              </div>
+              <div class="entry__info">
+                <h4 class="entry__title">EyeTalk</h4>
+                <div class="entry__cat">
+                  Empowering Communication with Iris Tracking
+                </div>
+              </div>
+            </a>
+
+            <div class="glightbox-desc entry__desc-07">
+              <p>
+                EyeTalk is a communication aid software which helps paralyzed
+                patients who cant even speak, to have natural conversation with
+                others using iris tracking and gen AI.
+                <a href="https://www.behance.net/">Project Link</a>.
+              </p>
+            </div>
+          </div>
+          <!-- entry -->
+
+          <div class="column entry">
+            <a
+              href="images/folio/hydro.jpg"
+              class="entry__link glightbox"
+              data-glightbox="title: UnderWater dam inspection robot: .entry__desc-08"
+            >
+              <div class="entry__thumb">
+                <img
+                  src="images/folio/hydro.jpg"
+                  srcset="images/folio/hydro.jpg 1x, images/folio/hydro.jpg 2x"
+                  alt=""
+                />
+              </div>
+              <div class="entry__info">
+                <h4 class="entry__title">HydroVision</h4>
+                <div class="entry__cat">Autonomous ROV for dam operation</div>
+              </div>
+            </a>
+
+            <div class="glightbox-desc entry__desc-08">
+              <p>
+                HydroBision is an autonomous underwater drone which is capable
+                of detecting defects like abrations, cracks and rust on the
+                concrete and metal submerged surfaces of a dam. It is also
+                capable of localized repair of the cracks and rust.
+                <a href="https://www.behance.net/">Project Link</a>.
+              </p>
+            </div>
+          </div>
+          <!-- entry -->
+        </div>
+      </section>
+      <!-- end s-works -->
+
+      <!-- # about
+        ================================================== -->
+      <section id="about" class="s-about target-section">
+        <div class="row s-about__content">
+          <div class="column xl-12">
+            <div class="section-header" data-num="04">
+              <h2 class="text-display-title">About Me.</h2>
+            </div>
+            <!-- end section-header -->
+
+            <p class="attention-getter">
+              I'm Vishaal, a student based in India passionate about weaving
+              words out of data. I look at data visialization as a key to
+              unlocking the potential of growth and I use machine learning as a
+              tool to strive towards that growth. I pride myself on my curiosity
+              and my unwavering drive to push my self beyond my limits.
+              <br /><br />
+              I've been part of a <b>1.5 lakhs success story</b>, a standout
+              finalist in <b>India's largest hackathon</b>, and a
+              <b>delegate</b> at India's biggest startup event.
+            </p>
+            <div class="about-entry">
+              <div
+                class="folio-entries"
+                style="
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                "
+              >
+                <div class="column entry1">
+                  <a
+                    href="images\about\hackfest.jpg"
+                    class="entry__link glightbox"
+                    data-glightbox="title:HackFest 2024 - 1.5 Lakhs Cash Prize; description: .entry__desc-09"
+                  >
+                    <div class="entry__thumb">
+                      <img
+                        src="images\about\hackfest.jpg"
+                        srcset="
+                          images\about\hackfest.jpg 1x,
+                          images\about\hackfest.jpg 2x
+                        "
+                        alt=""
+                      />
+                    </div>
+                    <div class="entry__info">
+                      <h4 class="entry__title">HackFest 2024</h4>
+                      <div class="entry__cat">coimbatore</div>
+                    </div>
+                  </a>
+
+                  <div class="glightbox-desc entry__desc-09">
+                    <p>
+                      A national level hackathon hosted by PSG iTech and SAP,
+                      where we secured 2nd place out of 2500 teams
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="row folio-entries"
+                style="
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                "
+              >
+                <div class="column entry1">
+                  <a
+                    href="images\about\sih.jpg"
+                    class="entry__link glightbox"
+                    data-glightbox="title:HackFest 2024 - 1.5 Lakhs Cash Prize; description: .entry__desc-10"
+                  >
+                    <div class="entry__thumb">
+                      <img
+                        src="images\about\sih.jpg"
+                        srcset="
+                          images\about\sih.jpg 1x,
+                          images\about\sih.jpg 2x
+                        "
+                        alt=""
+                      />
+                    </div>
+                    <div class="entry__info">
+                      <h4 class="entry__title">Smart India Hackathon 2023</h4>
+                      <div class="entry__cat">Faridabad</div>
+                    </div>
+                  </a>
+
+                  <div class="glightbox-desc entry__desc-10">
+                    <p>
+                      India's biggest hackathon with over 51,000 teams
+                      participating, and we got drafted into the final bracket.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="row folio-entries"
+                style="
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                "
+              >
+                <div class="column entry1">
+                  <a
+                    href="images\about\startup.jpg"
+                    class="entry__link glightbox"
+                    data-glightbox="title:HackFest 2024 - 1.5 Lakhs Cash Prize; description: .entry__desc-11"
+                  >
+                    <div class="entry__thumb">
+                      <img
+                        src="images\about\startup.jpg"
+                        srcset="
+                          images\about\startup.jpg 1x,
+                          images\about\startup.jpg 2x
+                        "
+                        alt=""
+                      />
+                    </div>
+                    <div class="entry__info">
+                      <h4 class="entry__title">Startup Mahakumb 2024</h4>
+                      <div class="entry__cat">Delhi</div>
+                    </div>
+                  </a>
+
+                  <div class="glightbox-desc entry__desc-11">
+                    <p>
+                      India's largest startup event where we were one of the
+                      selected few to showcase our innovative startup to a large
+                      audience
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!--end column -->
+        </div>
+        <!--end s-about__content -->
+      </section>
+      <!-- end s-about -->
+
+      <!-- # footer 
+        ================================================== -->
+      <footer id="footer" class="s-footer target-section">
+        <div class="row">
+          <div class="column lg-12">
+            <div class="section-header light-on-dark" data-num="05">
+              <h2 class="text-display-title">Get In Touch.</h2>
+            </div>
+            <!-- end section-header -->
+          </div>
+        </div>
+
+        <div class="row s-footer__content">
+          <div class="column xl-6 md-12 s-footer__block s-footer__about">
+            <p class="attention-getter">
+              Let's discuss how my skills can help bring your vision to life.
+            </p>
+          </div>
+          <!-- end section-footer__about -->
+
+          <div class="column xl-6 md-12 s-footer__block s-footer__site-links">
+            <div class="row">
+              <div class="column xl-4 lg-5 md-6 tab-12">
+                <h5>Connect</h5>
+                <ul class="link-list">
+                  <li>
+                    <a href="https://www.linkedin.com/in/vishaal-s-52686b294/"
+                      >Linkedin</a
+                    >
+                  </li>
+                  <li>
+                    <a href="https://github.com/Vishaal-sathya">Github</a>
+                  </li>
+                </ul>
+              </div>
+              <div class="column xl-6 md-6 tab-12">
+                <h5>Contact Me</h5>
+                <ul class="link-list">
+                  <li>
+                    <a href="mailto:svishaalofficial@gmail.com"
+                      >svishaalofficial@gmail.com</a
+                    >
+                  </li>
+                  <li><a href="tel:+1975432345">+91 6380520414</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <!-- end section-footer__site-links -->
+        </div>
+        <!-- end section-footer__content -->
+
+        <div class="row s-footer__buttons">
+          <div class="column xl-6 tab-12">
+            <a
+              href="mailto:svishaalofficial@gmail.com"
+              class="btn btn--primary btn--large u-fullwidth"
+              >Message Me</a
+            >
+          </div>
+
+          <div class="column xl-6 tab-12">
+            <a
+              href="Vishaal S Resume.pdf"
+              download
+              class="btn btn--stroke btn--large u-fullwidth"
+              >Get My CV</a
+            >
+          </div>
+        </div>
+        <!-- end section-footer__buttons -->
+
+        <div class="row s-footer__bottom">
+          <div class="column xl-6 lg-12">
+            <ul class="s-footer__social social-list">
+              <li>
+                <a href="https://www.linkedin.com/in/vishaal-s-52686b294/">
+                  <img
+                    src="images/socials/linkedin.png"
+                    alt="linkedin"
+                    width="24"
+                    height="24"
+                  />
+                  <span class="u-screen-reader-text">Linkedin</span>
+                </a>
+              </li>
+              <li></li>
+              <li></li>
+              <li>
+                <a href="https://github.com/Vishaal-sathya">
+                  <img
+                    src="images/socials/git.png"
+                    alt="linkedin"
+                    width="24"
+                    height="24"
+                  />
+                  <span class="u-screen-reader-text">Linkedin</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+          <!-- end section-footer__social -->
+        </div>
+        <!-- end section-footer__bottom -->
+
+        <div class="ss-go-top">
+          <a class="smoothscroll" title="Back to Top" href="#top">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              style="fill: rgba(0, 0, 0, 1)"
+            >
+              <path
+                d="M5.536 21.886a1.004 1.004 0 0 0 1.033-.064l13-9a1 1 0 0 0 0-1.644l-13-9A1 1 0 0 0 5 3v18a1 1 0 0 0 .536.886z"
+              ></path>
+            </svg>
+          </a>
+          <span>Back To Top</span>
+        </div>
+        <!-- end ss-go-top -->
+      </footer>
+      <!-- end s-footer -->
+    </div>
+    <!-- end page-wrap -->
+
+    <!-- Java Script
+    ================================================== -->
+    <script src="js/plugins.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/addition.js"></script>
+  </body>
+</html>
