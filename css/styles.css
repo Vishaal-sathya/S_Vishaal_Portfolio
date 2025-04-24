@@ -4618,3 +4618,73 @@ td:last-child {
         display: block;
     }
   }
+
+
+  
+.experience-image{
+    height: 650px;
+    width: 500px;
+}
+
+.experience-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3rem;
+    align-items: flex-start;
+    margin-top: 2rem;
+  }
+  
+  .experience-text {
+    flex: 1;
+    max-width: 600px;
+  }
+  
+  .experience-subheading {
+    font-size: 2.75rem;
+    margin-bottom: -65px;
+  }
+
+  .experience-sub-subheading {
+    font-size: 1.75rem;
+    margin-bottom: 0.85rem;
+  }
+  
+  .underline {
+    width: 60px;
+    height: 4px;
+    background-color: #000;
+    margin-bottom: 1rem;
+  }
+
+  .experience-ul{
+    margin-top: -30px;
+  }
+
+  
+  .experience-wrapper .folio-entries {
+    margin: 0; 
+  }
+  
+  .experience-wrapper .column.entry {
+    flex-shrink: 0;
+    width: 500px;
+  }
+  
+  @media (max-width: 768px) {
+    .experience-wrapper {
+      flex-direction: column;
+    }
+
+    .experience-wrapper .column.entry {
+        flex-shrink: 0;
+        width: 350px;
+      }
+
+   
+    .experience-wrapper img {
+        width: 350px;
+        height: 450px;
+      }
+  }
+  
+  
