@@ -116,7 +116,7 @@
               <div class="s-intro__content-pretitle text-pretitle">Hello</div>
               <h1 class="s-intro__content-title">
                 I'm S Vishaal <br />
-                aspiring backend and ML engineer.
+                aspiring data analyst and ML engineer.
               </h1>
 
               <div class="s-intro__content-btns">
@@ -209,14 +209,33 @@
             </div>
             <div class="skills-grid">
               <div class="skill-item">
-                <img src="images/skills/python.png" alt="Python" />
-                <p>Python</p>
+                <img src="images/skills/powerbi.png" alt="Power BI" />
+                <p>Power BI</p>
                 <div class="hover-info">
                   <ul>
-                    <li>Object Oriented Programming</li>
-                    <li>Data Structures</li>
-                    <li>Numpy & Pandas</li>
-                    <li>Matplotlib & Seaborn</li>
+                    <li>
+                      <!-- <span>Data Modeling</span>
+                      <span>ETL</span>
+                      <span>DAX</span>
+                      <span>Dashboards</span> -->
+                      Data Modeling
+                    </li>
+                    <li>ETL</li>
+
+                    <li>DAX</li>
+                    <li>Dashboards</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="divider"></div>
+              <div class="skill-item">
+                <img src="images/skills/excel.png" alt="MS Excel" />
+                <p>MS Excel</p>
+                <div class="hover-info">
+                  <ul>
+                    <li>Conditional Formatting</li>
+                    <li>Data Validation</li>
+                    <li>Power Query & Power Pivot</li>
                   </ul>
                 </div>
               </div>
@@ -232,36 +251,11 @@
                   </ul>
                 </div>
               </div>
-              <div class="divider"></div>
-              <div class="skill-item">
-                <img src="images/skills/js.png" alt="SQL" />
-                <p>Javascript</p>
-                <div class="hover-info">
-                  <ul>
-                    <li>DOM Manipulation</li>
-                    <li>Event Handling</li>
-                    <li>Fetch API & JSON</li>
-                  </ul>
-                </div>
-              </div>
             </div>
 
             <div class="horizontal-divider" style="margin: 0px"></div>
 
             <div class="skills-grid">
-                
-              <div class="skill-item">
-                <img src="images/skills/flask.png" alt="Python" />
-                <p>Flask</p>
-                <div class="hover-info">
-                  <ul>
-                    <li>Routing & Blueprints</li>
-                    <li>REST API Development</li>
-                    <li>Flask-SQLAlchemy</li>
-                  </ul>
-                </div>
-              </div>
-              <div class="divider"></div>
               <div class="skill-item">
                 <img src="images/skills/ml.png" alt="Machine Learning" />
                 <p>Machine Learning</p>
@@ -285,6 +279,19 @@
                     <li>Object Detection</li>
                     <li>Segmentation</li>
                     <li>Classification</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="divider"></div>
+              <div class="skill-item">
+                <img src="images/skills/python.png" alt="Python" />
+                <p>Python</p>
+                <div class="hover-info">
+                  <ul>
+                    <li>Object Oriented Programming</li>
+                    <li>Data Structures</li>
+                    <li>Numpy & Pandas</li>
+                    <li>Matplotlib & Seaborn</li>
                   </ul>
                 </div>
               </div>
@@ -374,44 +381,205 @@
         <div class="row folio-entries">
           <div class="column entry">
             <a
-              href="images/folio/revive.png"
+              href="images/folio/lifeline.png"
               class="entry__link glightbox"
-              data-glightbox="title: Data aggregation, AI Assistant and resource & team management system; description: .entry__desc-01"
+              data-glightbox="title: Will the number of deployed nodes be sufficient?; description: .entry__desc-01"
             >
               <div class="entry__thumb">
                 <img
-                  src="images/folio/revive.png"
+                  src="images/folio/lifeline.png"
                   srcset="
-                    images/folio/revive.png 1x,
-                    images/folio/revive.png 2x
+                    images/folio/lifeline.png 1x,
+                    images/folio/lifeline.png 2x
                   "
                   alt=""
                 />
               </div>
               <div class="entry__info">
-                <h4 class="entry__title">Revive</h4>
-                <div class="entry__cat">Mid-Disaster Communications and Management System</div>
+                <h4 class="entry__title">Feasibility Analysis</h4>
+                <div class="entry__cat">LifeLine Communications</div>
               </div>
             </a>
 
             <div class="glightbox-desc entry__desc-01">
               <p>
-                Revive is a data aggregation system to help optimize the rescue operations 
-                during disasters by collecting and validating information from various sources, 
-                manage team, shelters, inventory etc. and provide assistive AI features like 
-                disaster categorization, report generation and more.
-                
+                LifeLine is an independent communications network used during
+                disaster. It requires there to be atleast one node within a 2Km
+                radius. This analysis is about the posibility of the formation
+                of the network keeping in mind the raidus limitation.
+                <a href="dashboards\feasibility analysis.xlsx" download
+                  >Download</a
+                >.
               </p>
             </div>
           </div>
-  
+          <!-- entry -->
+
+          <div class="column entry">
+            <a
+              href="images/folio/ship.png"
+              class="entry__link glightbox"
+              data-glightbox="title: Where is the revenue lacking?; description: .entry__desc-02"
+            >
+              <div class="entry__thumb">
+                <img
+                  src="images/folio/ship.png"
+                  srcset="images/folio/ship.png 1x, images/folio/ship.png 2x"
+                  alt=""
+                />
+              </div>
+              <div class="entry__info">
+                <h4 class="entry__title">Business Analysis</h4>
+                <div class="entry__cat">Sales and Shipping</div>
+              </div>
+            </a>
+
+            <div class="glightbox-desc entry__desc-02">
+              <p>
+                This analysis is about the sales of the organisation with
+                respect to different factors like categories, geography,
+                employees and shipping details.
+                <a href="dashboards\sales and shipping.xlsx" download
+                  >Download</a
+                >.
+              </p>
+            </div>
+          </div>
+          <!-- entry -->
+
+          <div class="column entry">
+            <a
+              href="images/folio/call.png"
+              class="entry__link glightbox"
+              data-glightbox="title: Who is the best employee and who needs to improve?; description: .entry__desc-03"
+            >
+              <div class="entry__thumb">
+                <img
+                  src="images/folio/call.png"
+                  srcset="images/folio/call.png 1x, images/folio/call.png 2x"
+                  alt=""
+                />
+              </div>
+              <div class="entry__info">
+                <h4 class="entry__title">HR Dashboard</h4>
+                <div class="entry__cat">Employee Performance Analysis</div>
+              </div>
+            </a>
+
+            <div class="glightbox-desc entry__desc-03">
+              <p>
+                This analysis dives deep into the performance of the employees
+                in a firm and net revenue brought in by each one of them through
+                deals.
+                <a href="dashboards\HR dashboard.xlsx" download>Download</a>.
+              </p>
+            </div>
+          </div>
+          <!-- entry -->
+
+          <div class="column entry">
+            <a
+              href="images/folio/hospital.png"
+              class="entry__link glightbox"
+              data-glightbox="title: Which sector needs better patient management?; description: .entry__desc-04"
+            >
+              <div class="entry__thumb">
+                <img
+                  src="images/folio/hospital.png"
+                  srcset="
+                    images/folio/hospital.png 1x,
+                    images/folio/hospital.png 2x
+                  "
+                  alt=""
+                />
+              </div>
+              <div class="entry__info">
+                <h4 class="entry__title">Hospital Management</h4>
+                <div class="entry__cat">Patient Waitlist Analysis</div>
+              </div>
+            </a>
+
+            <div class="glightbox-desc entry__desc-04">
+              <p>
+                This is an analysis about the average waiting time for patients
+                in a hospital. It seeks to provide in depth analysis of waitlist
+                for each department in the hospital.
+                <a href="dashboards\Hospital.pbix" download>Download</a>.
+              </p>
+            </div>
+          </div>
+          <!-- entry -->
+
+          <div class="column entry">
+            <a
+              href="images/folio/amazon.png"
+              class="entry__link glightbox"
+              data-glightbox="title: Which category is the best and which one performs below average?; description: .entry__desc-05"
+            >
+              <div class="entry__thumb">
+                <img
+                  src="images/folio/amazon.png"
+                  srcset="
+                    images/folio/amazon.png 1x,
+                    images/folio/amazon.png 2x
+                  "
+                  alt=""
+                />
+              </div>
+              <div class="entry__info">
+                <h4 class="entry__title">Sales Analysis</h4>
+                <div class="entry__cat">Amazon</div>
+              </div>
+            </a>
+
+            <div class="glightbox-desc entry__desc-05">
+              <p>
+                This is a complete analysis of the sales of each and every
+                product category in amazon and the performance and net revenue
+                of said product categories.
+                <a href="dashboards\amazon.pbix" download>Download</a>.
+              </p>
+            </div>
+          </div>
+          <!-- entry -->
+
+          <div class="column entry">
+            <a
+              href="images/folio/netflix.png"
+              class="entry__link glightbox"
+              data-glightbox="title: Frequency of TV shows and movies over time; description: .entry__desc-06"
+            >
+              <div class="entry__thumb">
+                <img
+                  src="images/folio/netflix.png"
+                  srcset="
+                    images/folio/netflix.png 1x,
+                    images/folio/netflix.png 2x
+                  "
+                  alt=""
+                />
+              </div>
+              <div class="entry__info">
+                <h4 class="entry__title">Trend Analysis</h4>
+                <div class="entry__cat">Netflix</div>
+              </div>
+            </a>
+
+            <div class="glightbox-desc entry__desc-06">
+              <p>
+                This is a high level analysis of the trends in the popularity
+                and hosting of tv shows and and movies on netflix over time.
+                <a href="dashboards\netflix.pbix">Download</a>.
+              </p>
+            </div>
+          </div>
           <!-- entry -->
 
           <div class="column entry">
             <a
               href="images/folio/eyetalk.png"
               class="entry__link glightbox"
-              data-glightbox="title: Communcation aid for paralyzed patients; description: .entry__desc-02"
+              data-glightbox="title: Communcation aid for paralyzed patients; description: .entry__desc-07"
             >
               <div class="entry__thumb">
                 <img
@@ -431,7 +599,7 @@
               </div>
             </a>
 
-            <div class="glightbox-desc entry__desc-02">
+            <div class="glightbox-desc entry__desc-07">
               <p>
                 EyeTalk is a communication aid software which helps paralyzed
                 patients who can't even speak, to have natural conversation with
@@ -449,7 +617,7 @@
             <a
               href="images/folio/hydro.jpg"
               class="entry__link glightbox"
-              data-glightbox="title: UnderWater dam inspection robot; description: .entry__desc-03"
+              data-glightbox="title: UnderWater dam inspection robot; description: .entry__desc-08"
             >
               <div class="entry__thumb">
                 <img
@@ -464,7 +632,7 @@
               </div>
             </a>
 
-            <div class="glightbox-desc entry__desc-03">
+            <div class="glightbox-desc entry__desc-08">
               <p>
                 HydroVision is an autonomous underwater drone which is capable
                 of detecting defects like abrations, cracks and rust on the
@@ -489,11 +657,10 @@
             <!-- end section-header -->
 
             <p class="attention-getter">
-              I'm Vishaal, a student based in India passionate about developing business 
-              solutions from the ground up. I prioritise crafting scalable and robust systems 
-              designed to last, adapt, and outlive their creators. With machine learning, 
-              I aim to bring a layer of intelligence to that foundation, making products not just work, 
-              but learn and evolve. I pride myself on my curiosity
+              I'm Vishaal, a student based in India passionate about weaving
+              words out of data. I look at data visualization as a key to
+              unlocking the potential of growth and I use machine learning as a
+              tool to strive towards that growth. I pride myself on my curiosity
               and my unwavering drive to push my self beyond my limits.
               <br /><br />
               I've been part of a <b>1.5 lakhs success story</b>, The winner of <b>India's largest hackathon</b>, and a
