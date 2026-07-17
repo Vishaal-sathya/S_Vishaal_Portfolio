@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Blogs Directory - Vishaal S Blog</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Castoro:ital@0;1&family=Public+Sans:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Styles -->
+    <style>
+      :root {
+        /* Design System Colors */
+        --color-1: hsla(12, 75%, 45%, 1);       /* Burnt Orange Accent */
+        --color-2: hsla(96, 10%, 19%, 1);       /* Muted Olive */
+        --color-3: hsla(0, 0%, 10%, 1);         /* Neutral Dark */
+        --color-body-bg: hsla(0, 0%, 98.4%, 1); /* Studio Light Gray */
+        --color-card-bg: #ffffff;
+        --color-text: #181818;
+        --color-text-light: #5e5f5e;
+        --color-border: rgba(0, 0, 0, 0.08);
+
+        /* Retro OS Light Theme Variables */
+        --os-bg: #e0e0e0;
+        --os-border-light: #ffffff;
+        --os-border-dark: #808080;
+        --os-border-shadow: #404040;
+        --os-viewport-bg: #ffffff;
+        --os-title-bg-start: #C73E1D;
+        --os-title-bg-end: #f18972;
+        --os-title-text: #ffffff;
+        --os-status-text: #181818;
+        --os-line-color: #808080;
+
+        /* CRT Light Theme Variables */
+        --crt-bg: var(--os-viewport-bg);
+        --crt-color: var(--color-text);
+        --crt-text-shadow: 0 0 1px rgba(0, 0, 0, 0.08);
+        --crt-glow-overlay: radial-gradient(circle, transparent 60%, rgba(0, 0, 0, 0.04) 100%),
+                            linear-gradient(rgba(0, 0, 0, 0.08) 50%, rgba(255, 255, 255, 0.1) 50%);
+        --crt-beam-color: rgba(0, 0, 0, 0.04);
+        --crt-hover-bg: rgba(199, 62, 29, 0.08);
+        --crt-divider: 1.5px dotted var(--os-line-color);
+        --crt-console-prompt: #228b22;
+        --crt-console-output: var(--color-text-light);
+        --crt-flicker-anim: crt-flicker-light 0.25s infinite;
+
+        /* Typography */
+        --font-1: "Public Sans", sans-serif;
+        --font-2: "Castoro", serif;
+        --font-mono: Consolas, "Andale Mono", Courier, monospace;
+      }
+
+      body.dark-mode {
+        --color-body-bg: hsla(0, 0%, 10%, 1);   /* Dark charcoal */
+        --color-card-bg: hsla(0, 0%, 15%, 1);   /* Lighter dark gray */
+        --color-text: #e5e5e5;                  /* Off-white text */
+        --color-text-light: #a5a7a5;            /* Muted gray text */
+        --color-border: rgba(255, 255, 255, 0.1);
+        --color-3: #ffffff;
+
+        /* Retro OS Dark Theme Variables */
+        --os-bg: #222222;
+        --os-border-light: #444444;
+        --os-border-dark: #111111;
+        --os-border-shadow: #000000;
+        --os-viewport-bg: #121212;
+        --os-title-bg-start: #333333;
+        --os-title-bg-end: #1e1e1e;
+        --os-title-text: #e0e0e0;
+        --os-status-text: #a5a7a5;
+        --os-line-color: #444444;
+
+        /* CRT Dark Theme Variables */
+        --crt-bg: var(--os-viewport-bg);
+        --crt-color: var(--color-text);
+        --crt-text-shadow: 0 0 1px rgba(255, 255, 255, 0.08);
+        --crt-glow-overlay: radial-gradient(circle, transparent 60%, rgba(0, 0, 0, 0.3) 100%),
+                            linear-gradient(rgba(0, 0, 0, 0.25) 50%, rgba(255, 255, 255, 0.05) 50%);
+        --crt-beam-color: rgba(255, 255, 255, 0.06);
+        --crt-hover-bg: rgba(199, 62, 29, 0.15);
+        --crt-divider: 1.5px dotted var(--os-line-color);
+        --crt-console-prompt: #4af626;
+        --crt-console-output: var(--color-text-light);
+        --crt-flicker-anim: crt-flicker-dark 0.15s infinite;
+      }
+
+      /* Global resets */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        font-size: 62.5%;
+        scroll-behavior: smooth;
+      }
+
+      body {
+        background-color: var(--color-body-bg);
+        color: var(--color-text);
+        font-family: var(--font-1);
+        font-size: 1.7rem;
+        line-height: 1.7;
+        padding: 0 4rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+      }
+
+      /* Header Nav */
+      .blog-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        padding: 3rem 0;
+        border-bottom: 1px solid var(--color-border);
+      }
+
+      .nav-logo {
+        font-family: var(--font-2);
+        font-size: 2.6rem;
+        font-weight: 700;
+        color: var(--color-3);
+        text-decoration: none;
+        letter-spacing: -0.02em;
+        transition: color 0.3s ease;
+      }
+
+      .nav-logo:hover {
+        color: var(--color-1);
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 1.5rem;
+        list-style: none;
+        align-items: center;
+      }
+
+      .nav-links a {
+        font-family: var(--font-mono);
+        font-size: 1.4rem;
+        color: var(--color-text-light);
+        text-decoration: none;
+        padding: 0.6rem 1.2rem;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+      }
+
+      .nav-links a:hover {
+        color: var(--color-1);
+        border-color: var(--color-1);
+        background-color: rgba(199, 62, 29, 0.05);
+      }
+
+      .nav-links .active-link {
+        color: var(--color-1);
+        border-color: var(--color-1);
+      }
+
+      .theme-toggle-btn {
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        background: none;
+        color: inherit;
+        padding: 0.6rem;
+        transition: color 0.3s ease;
+      }
+
+      .theme-toggle-btn:hover {
+        color: var(--color-1) !important;
+      }
+
+      /* Title Section */
+      .explorer-header {
+        text-align: center;
+        margin: 5rem 0 3rem 0;
+      }
+
+      .explorer-header h1 {
+        font-family: var(--font-2);
+        font-size: 4.2rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: var(--color-3);
+      }
+
+      .explorer-header p {
+        font-size: 1.6rem;
+        color: var(--color-text-light);
+        margin-top: 1rem;
+      }
+
+      /* Main Window container */
+      .explorer-container {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding-bottom: 8rem;
+        width: 100%;
+      }
+
+      /* Retro Window Frame */
+      .explorer-window {
+        width: 100%;
+        max-width: 800px;
+        background-color: var(--os-bg);
+        padding: 4px;
+        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        transition: background-color 0.3s ease;
+
+        /* Retro 3D Bevel Border (Outward) */
+        border: 2px solid;
+        border-color: var(--os-border-light) var(--os-border-dark) var(--os-border-dark) var(--os-border-light);
+      }
+
+      /* Window Title Bar */
+      .title-bar {
+        height: 34px;
+        padding: 4px 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: linear-gradient(90deg, var(--os-title-bg-start), var(--os-title-bg-end));
+        color: var(--os-title-text);
+        user-select: none;
+      }
+
+      .title-text-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .title-icon {
+        width: 16px;
+        height: 16px;
+        display: inline-block;
+        fill: currentColor;
+      }
+
+      .title-bar-text {
+        font-family: var(--font-mono);
+        font-size: 1.3rem;
+        font-weight: bold;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+
+      /* Control Boxes */
+      .title-controls {
+        display: flex;
+        gap: 4px;
+      }
+
+      .control-box {
+        width: 22px;
+        height: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-mono);
+        font-size: 1.2rem;
+        font-weight: bold;
+        background-color: var(--os-bg);
+        color: var(--color-text);
+        cursor: pointer;
+        user-select: none;
+        border: 1.5px solid;
+        border-color: var(--os-border-light) var(--os-border-dark) var(--os-border-dark) var(--os-border-light);
+        outline: none;
+      }
+
+      .control-box:active {
+        border-color: var(--os-border-dark) var(--os-border-light) var(--os-border-light) var(--os-border-dark);
+        padding: 1px 0 0 1px;
+      }
+
+      /* Address Bar path */
+      .address-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px;
+        background-color: var(--os-bg);
+        border-bottom: 2px solid;
+        border-color: var(--os-border-dark) var(--os-border-light) var(--os-border-light) var(--os-border-dark);
+      }
+
+      .address-label {
+        font-family: var(--font-mono);
+        font-size: 1.2rem;
+        color: var(--color-text-light);
+      }
+
+      .address-input {
+        flex-grow: 1;
+        font-family: var(--font-mono);
+        font-size: 1.3rem;
+        padding: 4px 8px;
+        background-color: var(--os-viewport-bg);
+        color: var(--color-text);
+        outline: none;
+        border: 1.5px solid;
+        border-color: var(--os-border-dark) var(--os-border-light) var(--os-border-light) var(--os-border-dark);
+      }
+
+      /* CRT Screen wrapper to hold viewport static overlays */
+      .viewport-screen-wrapper {
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        min-height: 420px;
+        transition: background-color 0.3s ease;
+
+        /* Inset Bevel border moved here from window-viewport */
+        border: 2px solid;
+        border-color: var(--os-border-dark) var(--os-border-light) var(--os-border-light) var(--os-border-dark);
+      }
+
+      /* Viewport Panel */
+      .window-viewport {
+        background-color: var(--crt-bg);
+        color: var(--crt-color);
+        padding: 3rem;
+        height: 420px;
+        overflow-y: auto;
+        text-shadow: var(--crt-text-shadow);
+        animation: var(--crt-flicker-anim);
+        transition: background-color 0.3s ease, color 0.3s ease, text-shadow 0.3s ease;
+      }
+
+      /* Glow overlay (Scanlines + CRT Curve) */
+      .crt-screen-overlay {
+        content: " ";
+        display: block;
+        position: absolute;
+        top: 0; left: 0; bottom: 0; right: 0;
+        background: var(--crt-glow-overlay);
+        background-size: 100% 100%, 100% 4px;
+        z-index: 4;
+        pointer-events: none;
+        transition: background 0.3s ease;
+      }
+
+      /* Rolling scanline beam */
+      .crt-rolling-beam {
+        content: " ";
+        display: block;
+        position: absolute;
+        top: 0; left: 0; bottom: 0; right: 0;
+        background: linear-gradient(
+          to bottom,
+          rgba(255, 255, 255, 0) 0%,
+          var(--crt-beam-color) 10%,
+          rgba(255, 255, 255, 0) 20%
+        );
+        z-index: 5;
+        pointer-events: none;
+        animation: scanline-roll 8s linear infinite;
+        transition: background 0.3s ease;
+      }
+
+      .terminal-boot, .tree-explorer {
+        position: relative;
+        z-index: 3;
+      }
+
+      .terminal-boot {
+        margin-bottom: 2rem;
+      }
+
+      .terminal-divider {
+        height: 1px;
+        border-top: var(--crt-divider);
+        margin: 2.5rem 0;
+        position: relative;
+        z-index: 3;
+        transition: border-top 0.3s ease;
+      }
+
+      .window-viewport .tree-name {
+        color: var(--crt-color);
+        text-shadow: var(--crt-text-shadow);
+        transition: color 0.3s ease, text-shadow 0.3s ease;
+      }
+
+      .window-viewport .tree-file {
+        color: var(--crt-color);
+        text-shadow: var(--crt-text-shadow);
+        transition: color 0.3s ease, text-shadow 0.3s ease;
+      }
+
+      .window-viewport .tree-row:hover {
+        background-color: var(--crt-hover-bg);
+      }
+
+      .window-viewport .tree-file:hover {
+        background-color: var(--crt-hover-bg);
+      }
+
+      /* Tree explorer architecture */
+      .tree-explorer {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      .tree-node {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .tree-row {
+        display: inline-flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.6rem 1rem;
+        cursor: pointer;
+        user-select: none;
+        border-radius: 4px;
+        transition: background-color 0.2s ease;
+      }
+
+      .tree-row:hover {
+        background-color: rgba(199, 62, 29, 0.08);
+      }
+
+      .tree-row.selected {
+        background-color: var(--color-1);
+        color: #ffffff;
+      }
+
+      .tree-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .tree-name {
+        font-family: var(--font-mono);
+        font-size: 1.5rem;
+        font-weight: 500;
+      }
+
+      /* Dotted path connection lines for files under folder */
+      .tree-children {
+        display: flex;
+        flex-direction: column;
+        margin-left: 18px;
+        padding-left: 20px;
+        border-left: 1.5px dotted var(--os-line-color);
+        max-height: 500px;
+        opacity: 1;
+        overflow: hidden;
+        transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+      }
+
+      .tree-children.collapsed {
+        max-height: 0;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .tree-file {
+        display: inline-flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.6rem 1rem;
+        margin-top: 0.5rem;
+        text-decoration: none;
+        color: inherit;
+        border-radius: 4px;
+        transition: background-color 0.2s ease;
+      }
+
+      .tree-file:hover {
+        background-color: rgba(199, 62, 29, 0.08);
+      }
+
+      .tree-file:hover .tree-name {
+        color: var(--color-1);
+      }
+
+      /* Status Strip panel */
+      .status-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 8px;
+        background-color: var(--os-bg);
+        font-family: var(--font-mono);
+        font-size: 1.1rem;
+        color: var(--os-status-text);
+        margin-top: 4px;
+        border-top: 1.5px solid var(--os-border-light);
+        user-select: none;
+      }
+
+      .status-panel {
+        padding: 2px 8px;
+        border: 1px solid;
+        border-color: var(--os-border-dark) var(--os-border-light) var(--os-border-light) var(--os-border-dark);
+      }
+
+      .terminal-console {
+        font-family: var(--font-mono);
+        font-size: 1.3rem;
+        color: var(--crt-color);
+      }
+
+      .console-prompt {
+        color: var(--crt-console-prompt);
+        font-weight: bold;
+        transition: color 0.3s ease;
+      }
+
+      .console-cmd {
+        color: var(--crt-color);
+        transition: color 0.3s ease;
+      }
+
+      .console-output {
+        color: var(--crt-console-output);
+        margin-top: 0.5rem;
+        transition: color 0.3s ease;
+      }
+
+      .terminal-os-header {
+        color: var(--crt-color) !important;
+        transition: color 0.3s ease;
+      }
+
+      /* Animations */
+      @keyframes page-fade-in {
+        from {
+          opacity: 0;
+          filter: blur(8px);
+          transform: translateY(15px);
+        }
+        to {
+          opacity: 1;
+          filter: blur(0);
+          transform: translateY(0);
+        }
+      }
+
+      .container {
+        opacity: 0;
+        animation: page-fade-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+
+      @keyframes explorer-entrance {
+        from {
+          opacity: 0;
+          transform: scale(0.97) translateY(15px);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
+
+      @keyframes tree-item-entrance {
+        from {
+          opacity: 0;
+          transform: translateX(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      @keyframes crt-flicker-light {
+        0% { opacity: 0.994; }
+        50% { opacity: 0.998; }
+        100% { opacity: 0.994; }
+      }
+
+      @keyframes crt-flicker-dark {
+        0% { opacity: 0.985; }
+        50% { opacity: 0.995; }
+        100% { opacity: 0.985; }
+      }
+
+      @keyframes scanline-roll {
+        0% { transform: translateY(-100%); }
+        100% { transform: translateY(100%); }
+      }
+
+      @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0; }
+      }
+
+      .explorer-window {
+        animation: explorer-entrance 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+
+      .tree-node {
+        opacity: 0;
+        animation: tree-item-entrance 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation-delay: 0.3s;
+      }
+
+      .tree-file {
+        opacity: 0;
+        animation: tree-item-entrance 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation-delay: 0.45s;
+      }
+
+      .terminal-cursor {
+        display: inline-block;
+        vertical-align: middle;
+        font-family: var(--font-mono);
+        color: var(--crt-color) !important;
+        transition: color 0.3s ease;
+      }
+
+
+      /* Responsiveness */
+      @media screen and (max-width: 768px) {
+        body {
+          padding: 0 2rem;
+        }
+
+        .viewport-screen-wrapper {
+          min-height: 380px;
+        }
+
+        .window-viewport {
+          padding: 2rem;
+          height: 380px;
+        }
+      }
+
+      @media screen and (max-width: 600px) {
+        .blog-nav {
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          gap: 1.5rem;
+          padding: 2rem 0;
+        }
+
+        .nav-logo {
+          font-size: 1.5rem !important;
+        }
+
+        .nav-links {
+          justify-content: center;
+          align-items: center;
+          padding: 0;
+        }
+      }
+
+
+    </style>
+  </head>
+  <body>
+    <script>
+      if (localStorage.getItem("theme") === "dark") {
+        document.body.classList.add("dark-mode");
+      }
+    </script>
+
+    <div class="container">
+      
+      <!-- Top Navigation -->
+      <nav class="blog-nav">
+        <a class="nav-logo" href="../index.html" style="font-family: var(--font-mono); font-size: 1.8rem; letter-spacing: 0; text-transform: none;">
+          vishaal<span style="color: var(--color-1);">@</span>blogs<span style="color: var(--color-text-light);">:~$</span><span class="terminal-cursor" style="animation: blink 0.8s infinite; color: var(--color-1);">_</span>
+        </a>
+        <ul class="nav-links">
+          <li><a href="../index.html">[P] PORTFOLIO</a></li>
+          <li><a class="active-link" href="#">[B] BLOG</a></li>
+          <li><a href="https://github.com/Vishaal-sathya" target="_blank">[G] GITHUB</a></li>
+          <!-- Theme Toggle -->
+          <li>
+            <a href="#0" id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Theme">
+              <svg class="theme-toggle-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+              </svg>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- Main Explorer Window Frame -->
+      <div class="explorer-container" style="margin-top: 6rem;">
+        <div class="explorer-window">
+          
+          <!-- Title Bar -->
+          <div class="title-bar">
+            <div class="title-text-container">
+              <!-- Small Folder SVG as brand window logo -->
+              <svg class="title-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+              </svg>
+              <span class="title-bar-text">Blogs Directory</span>
+            </div>
+            <div class="title-controls">
+              <button class="control-box" title="Minimize">-</button>
+              <button class="control-box" title="Maximize">▢</button>
+              <button class="control-box" title="Close" onclick="window.location.href='../index.html'">X</button>
+            </div>
+          </div>
+
+          <!-- Address Path Bar -->
+          <div class="address-bar">
+            <span class="address-label">Address:</span>
+            <input class="address-input" type="text" readonly value="C:\Vishaal\Blogs\" />
+          </div>
+
+          <!-- Main Inset Window Area -->
+          <div class="viewport-screen-wrapper">
+            <div class="window-viewport">
+              
+              <!-- Unified Terminal Boot Section -->
+              <div class="terminal-boot">
+                <div class="terminal-os-header" style="font-family: var(--font-mono); font-size: 1.4rem; line-height: 1.6; color: var(--color-1); margin-bottom: 2rem;">
+                  Vishaal Blogs [Version 1.0.26] <br />
+                  (c) Vishaal S. All rights reserved.
+                </div>
+                <div class="terminal-console">
+                  <span class="console-prompt">guest@vishaal-blog:~$</span> <span class="console-cmd">cat welcome.txt</span>
+                  <p class="console-output">System initialized. 1 collection, 1 document indexed. Ready to read...</p>
+                </div>
+              </div>
+
+              <!-- Terminal Divider line -->
+              <div class="terminal-divider"></div>
+
+              <div class="tree-explorer">
+                
+                <!-- Collection Folder Node -->
+                <div class="tree-node">
+                  <div class="tree-row" id="llm-folder" onclick="toggleFolder()">
+                    <span class="tree-icon" id="folder-icon-container">
+                      <!-- Folder Open SVG by default -->
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="#F0C358" stroke="#B07C1C" stroke-width="1.5" stroke-linejoin="round">
+                        <path d="M4 20h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-8L10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z" />
+                        <path d="M2 10h20l-2 8H4z" fill="#E8B036" stroke="#B07C1C" stroke-width="1.5" />
+                      </svg>
+                    </span>
+                    <span class="tree-name">Building an LLM from scratch</span>
+                  </div>
+
+                  <!-- Child Files in Folder -->
+                  <div class="tree-children" id="llm-children">
+                    <a class="tree-file" href="understanding-large-language-models.html">
+                      <span class="tree-icon">
+                        <!-- Retro document SVG outline icon -->
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="#FFFFFF" stroke="#555555" stroke-width="1.5" stroke-linejoin="round">
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                          <polyline points="14 2 14 8 20 8" />
+                          <line x1="16" y1="13" x2="8" y2="13" stroke-width="1" />
+                          <line x1="16" y1="17" x2="8" y2="17" stroke-width="1" />
+                          <polyline points="10 9 9 9 8 9" stroke-width="1" />
+                        </svg>
+                      </span>
+                      <span class="tree-name">1. Understanding Large Language Models</span>
+                    </a>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+            <!-- CRT Screen Overlays -->
+            <div class="crt-screen-overlay"></div>
+            <div class="crt-rolling-beam"></div>
+          </div>
+
+          <!-- Bottom Status Bar -->
+          <div class="status-bar">
+            <div class="status-panel">1 object(s) in collection</div>
+            <div class="status-panel">15.2 KB</div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Script handlers -->
+    <script>
+      // Toggle Collapsible Folder state
+      function toggleFolder() {
+        const children = document.getElementById("llm-children");
+        const folderIconContainer = document.getElementById("folder-icon-container");
+        
+        children.classList.toggle("collapsed");
+        const isCollapsed = children.classList.contains("collapsed");
+        
+        if (isCollapsed) {
+          // Switch to Folder Closed SVG
+          folderIconContainer.innerHTML = `
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="#E8B036" stroke="#B07C1C" stroke-width="1.5" stroke-linejoin="round">
+              <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8L10 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z" />
+            </svg>
+          `;
+        } else {
+          // Switch to Folder Open SVG
+          folderIconContainer.innerHTML = `
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="#F0C358" stroke="#B07C1C" stroke-width="1.5" stroke-linejoin="round">
+              <path d="M4 20h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-8L10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z" />
+              <path d="M2 10h20l-2 8H4z" fill="#E8B036" stroke="#B07C1C" stroke-width="1.5" />
+            </svg>
+          `;
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", function() {
+        // Theme Toggle script
+        const themeToggle = document.getElementById("theme-toggle");
+        if (themeToggle) {
+          const currentTheme = localStorage.getItem("theme") || "light";
+          if (currentTheme === "dark") {
+            updateThemeIcon(themeToggle, "dark");
+          }
+
+          themeToggle.addEventListener("click", function(e) {
+            e.preventDefault();
+            document.body.classList.toggle("dark-mode");
+            const theme = document.body.classList.contains("dark-mode") ? "dark" : "light";
+            localStorage.setItem("theme", theme);
+            updateThemeIcon(themeToggle, theme);
+          });
+        }
+
+        // Typewriter effect for terminal console output welcome message
+        const consoleOutput = document.querySelector(".console-output");
+        if (consoleOutput) {
+          const txt = consoleOutput.textContent;
+          consoleOutput.textContent = "";
+          let i = 0;
+          const cursor = document.createElement("span");
+          cursor.className = "terminal-cursor";
+          cursor.innerHTML = "&#9608;";
+          cursor.style.color = "var(--crt-console-prompt)";
+          cursor.style.marginLeft = "4px";
+          cursor.style.animation = "blink 0.8s infinite";
+          consoleOutput.appendChild(cursor);
+
+          function typeWriter() {
+            if (i < txt.length) {
+              const char = document.createTextNode(txt.charAt(i));
+              consoleOutput.insertBefore(char, cursor);
+              i++;
+              setTimeout(typeWriter, 30);
+            }
+          }
+          typeWriter();
+        }
+
+        function updateThemeIcon(btn, theme) {
+          const svg = btn.querySelector(".theme-toggle-icon");
+          if (!svg) return;
+          if (theme === "dark") {
+            svg.innerHTML = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`;
+          } else {
+            svg.innerHTML = `
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            `;
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

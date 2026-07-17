@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Understanding Large Language Models - Vishaal S Blog</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Castoro:ital@0;1&family=Public+Sans:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
+
+  <!-- Styles -->
+  <style>
+    :root {
+      /* Design System Colors */
+      --color-1: hsla(12, 75%, 45%, 1);
+      /* Burnt Orange Accent */
+      --color-2: hsla(96, 10%, 19%, 1);
+      /* Muted Olive */
+      --color-3: hsla(0, 0%, 10%, 1);
+      /* Neutral Dark */
+      --color-body-bg: hsla(0, 0%, 98.4%, 1);
+      /* Studio Light Gray */
+      --color-card-bg: #ffffff;
+      --color-text: #181818;
+      --color-text-light: #5e5f5e;
+      --color-border: rgba(0, 0, 0, 0.08);
+      --color-divider: #C73E1D;
+
+      /* Typography */
+      --font-1: "Public Sans", sans-serif;
+      --font-2: "Castoro", serif;
+      --font-mono: Consolas, "Andale Mono", Courier, monospace;
+    }
+
+    body.dark-mode {
+      --color-body-bg: hsla(0, 0%, 10%, 1);
+      /* Dark charcoal */
+      --color-card-bg: hsla(0, 0%, 15%, 1);
+      /* Lighter dark gray */
+      --color-text: #e5e5e5;
+      /* Off-white text */
+      --color-text-light: #a5a7a5;
+      /* Muted gray text */
+      --color-border: rgba(255, 255, 255, 0.1);
+      --color-3: #ffffff;
+      /* White titles */
+      --color-2: #bdbebd;
+    }
+
+    /* Global resets */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      font-size: 62.5%;
+      /* 1rem = 10px */
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--color-body-bg);
+      color: var(--color-text);
+      font-family: var(--font-1);
+      font-size: 1.7rem;
+      line-height: 1.7;
+      padding: 0 4rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Header Nav */
+    .blog-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      padding: 3rem 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .nav-logo {
+      font-family: var(--font-2);
+      font-size: 2.6rem;
+      font-weight: 700;
+      color: var(--color-3);
+      text-decoration: none;
+      letter-spacing: -0.02em;
+      transition: color 0.3s ease;
+    }
+
+    .nav-logo:hover {
+      color: var(--color-1);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+      align-items: center;
+    }
+
+    .nav-links a {
+      font-family: var(--font-mono);
+      font-size: 1.4rem;
+      color: var(--color-text-light);
+      text-decoration: none;
+      padding: 0.6rem 1.2rem;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+    }
+
+    .nav-links a:hover {
+      color: var(--color-1);
+      border-color: var(--color-1);
+      background-color: rgba(199, 62, 29, 0.05);
+    }
+
+    .nav-links .active-link {
+      color: var(--color-1);
+      border-color: var(--color-1);
+    }
+
+    /* Hero Section */
+    #blog-hero {
+      padding: 6rem 0 4rem 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    #blog-hero h1 {
+      font-family: var(--font-1);
+      font-size: 5.6rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      color: var(--color-3);
+      max-width: 1000px;
+    }
+
+    /* Layout */
+    .blog-layout {
+      display: flex;
+      gap: 6rem;
+      padding: 6rem 0;
+      position: relative;
+    }
+
+    /* Sidebar Column */
+    .sidebar-col {
+      width: 30%;
+      position: sticky;
+      top: 4rem;
+      height: fit-content;
+      display: flex;
+      flex-direction: column;
+      gap: 3rem;
+    }
+
+    /* Sticky animated title */
+    .sidebar-title {
+      font-family: var(--font-2);
+      font-size: 2.2rem;
+      font-weight: 500;
+      line-height: 1.3;
+      color: var(--color-3);
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      margin-bottom: 0;
+      transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+        opacity 0.4s ease,
+        margin-bottom 0.4s ease,
+        padding-bottom 0.4s ease;
+    }
+
+    /* When scrolled past hero, show sticky title */
+    .sidebar-col.has-scrolled .sidebar-title {
+      max-height: 180px;
+      opacity: 1;
+      margin-bottom: 2rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px dashed var(--color-border);
+    }
+
+    .metadata-section-label {
+      font-family: var(--font-mono);
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--color-divider);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+
+    .metadata-table {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .metadata-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.2rem 0;
+      border-bottom: 1px dashed var(--color-border);
+      font-size: 1.4rem;
+    }
+
+    .metadata-label {
+      font-family: var(--font-mono);
+      color: var(--color-text-light);
+      text-transform: uppercase;
+    }
+
+    .metadata-value {
+      font-weight: 500;
+      color: var(--color-text);
+    }
+
+    .metadata-value-box {
+      font-family: var(--font-mono);
+      color: var(--color-1);
+      border: 1px solid var(--color-1);
+      padding: 0.2rem 0.8rem;
+      border-radius: 4px;
+      font-size: 1.2rem;
+      background-color: rgba(199, 62, 29, 0.03);
+    }
+
+    .sidebar-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .action-btn-row {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .action-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8rem;
+      font-family: var(--font-mono);
+      font-size: 1.2rem;
+      color: var(--color-text);
+      text-decoration: none;
+      padding: 1rem;
+      border: 1px solid var(--color-border);
+      background-color: var(--color-card-bg);
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .action-btn:hover {
+      border-color: var(--color-1);
+      color: var(--color-1);
+      background-color: rgba(199, 62, 29, 0.02);
+    }
+
+    /* Content Column */
+    .content-col {
+      width: 70%;
+      display: flex;
+      flex-direction: column;
+      gap: 4rem;
+    }
+
+    .content-section-label {
+      font-family: var(--font-mono);
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--color-text-light);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: 1rem;
+    }
+
+    /* Typography in Article */
+    .article-body h2 {
+      font-family: var(--font-2);
+      font-size: 3.2rem;
+      color: var(--color-3);
+      margin: 4rem 0 2rem 0;
+      font-weight: 500;
+      line-height: 1.3;
+    }
+
+    .article-body h2:first-of-type {
+      margin-top: 0;
+    }
+
+    .article-body p {
+      font-size: 1.8rem;
+      line-height: 1.8;
+      color: var(--color-text);
+      margin-bottom: 2.5rem;
+    }
+
+    .article-body li {
+      color: var(--color-text);
+    }
+
+    .article-body strong {
+      color: var(--color-3);
+      font-weight: 600;
+    }
+
+    .article-body a {
+      color: var(--color-1);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.3s ease;
+    }
+
+    .article-body a:hover {
+      border-color: var(--color-1);
+    }
+
+    /* Takeaways box */
+    .takeaways-box {
+      border: 1px solid var(--color-border);
+      border-left: 4px solid var(--color-1);
+      background-color: rgba(199, 62, 29, 0.02);
+      padding: 2.5rem;
+      border-radius: 6px;
+      margin-bottom: 4rem;
+    }
+
+    .takeaways-box h4 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: var(--color-3);
+      margin-bottom: 1.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .takeaways-box ul {
+      list-style-type: disc;
+      padding-left: 2rem;
+    }
+
+    .takeaways-box li {
+      font-size: 1.6rem;
+      color: var(--color-text-light);
+      margin-bottom: 1rem;
+      line-height: 1.6;
+    }
+
+    /* Note box */
+    .note-box {
+      background-color: var(--color-card-bg);
+      border: 1px dashed var(--color-border);
+      padding: 2.5rem;
+      border-radius: 6px;
+      margin: 3.5rem 0;
+    }
+
+    .note-box strong {
+      display: block;
+      font-size: 1.8rem;
+      color: var(--color-3);
+      margin-bottom: 1rem;
+    }
+
+    .note-box p {
+      font-size: 1.65rem;
+      color: var(--color-text-light);
+      margin-bottom: 0 !important;
+      line-height: 1.7;
+    }
+
+    /* Code Block */
+    pre {
+      background-color: var(--color-3);
+      color: #e5e5e5;
+      padding: 3rem;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: 3rem 0;
+      font-size: 1.45rem;
+      line-height: 1.6;
+      box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.15);
+    }
+
+    code {
+      font-family: var(--font-mono);
+    }
+
+    /* Inline code */
+    p code {
+      background-color: rgba(0, 0, 0, 0.05);
+      color: var(--color-1);
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      font-size: 1.5rem;
+    }
+
+    /* Blog images styling */
+    .blog-image-wrapper {
+      margin: 4rem 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    .blog-image {
+      width: 100%;
+      max-height: 480px;
+      object-fit: contain;
+      border-radius: 6px;
+      border: 1px solid var(--color-border);
+      box-shadow: 0 10px 25px -10px rgba(0, 0, 0, 0.05);
+      background-color: #ffffff;
+    }
+
+    .blog-image-caption {
+      font-size: 1.4rem;
+      color: var(--color-text-light);
+      text-align: center;
+      font-style: italic;
+      line-height: 1.5;
+      padding: 0 2rem;
+    }
+
+    /* Responsiveness */
+    @media screen and (max-width: 1024px) {
+      body {
+        padding: 0 3rem;
+      }
+
+      #blog-hero h1 {
+        font-size: 4.6rem;
+      }
+
+      .blog-layout {
+        gap: 4rem;
+      }
+    }
+
+    @media screen and (max-width: 768px) {
+      body {
+        padding: 0 2rem;
+      }
+
+      #blog-hero h1 {
+        font-size: 3.6rem;
+        margin: 4rem 0;
+      }
+
+      .blog-layout {
+        flex-direction: column;
+        gap: 5rem;
+        padding: 4rem 0;
+      }
+
+      .sidebar-col {
+        width: 100%;
+        position: static;
+      }
+
+      .content-col {
+        width: 100%;
+      }
+
+      .sidebar-col.has-scrolled .sidebar-title {
+        max-height: 0;
+        opacity: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+        margin-bottom: 0;
+      }
+
+      .nav-logo {
+        font-size: 2.0rem;
+      }
+    }
+
+    @media screen and (max-width: 600px) {
+      .blog-nav {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 1.5rem;
+        padding: 2rem 0;
+      }
+
+      .nav-logo {
+        font-size: 1.6rem;
+      }
+
+      .nav-links {
+        justify-content: center;
+        align-items: center;
+        padding: 0;
+      }
+    }
+
+    /* Footer styles */
+    .blog-footer {
+      width: 100%;
+      padding: 6rem 0 3rem 0;
+      margin-top: auto;
+    }
+
+    .footer-divider {
+      width: 100%;
+      height: 1px;
+      border-top: 1px solid var(--color-border);
+      margin-bottom: 3rem;
+    }
+
+    .footer-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 2rem;
+    }
+
+    .footer-copyright {
+      font-size: 1.4rem;
+      color: var(--color-text-light);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .footer-links a {
+      font-family: var(--font-mono);
+      font-size: 1.3rem;
+      color: var(--color-text-light);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .footer-links a:hover {
+      color: var(--color-1);
+    }
+
+    .back-to-top-link {
+      font-family: var(--font-mono);
+      font-size: 1.3rem;
+      color: var(--color-text-light);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .back-to-top-link:hover {
+      color: var(--color-1);
+    }
+
+    @media screen and (max-width: 600px) {
+      .footer-content {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 1.5rem;
+      }
+
+      .footer-links {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <script>
+    if (localStorage.getItem("theme") === "dark") {
+      document.body.classList.add("dark-mode");
+    }
+  </script>
+  <div class="container">
+
+    <!-- Top Navigation -->
+    <nav class="blog-nav">
+      <a class="nav-logo" href="../index.html">Build an LLM from Scratch #1</a>
+      <ul class="nav-links">
+        <li><a href="../index.html">[P] PORTFOLIO</a></li>
+        <li><a href="index.html">[B] BLOG</a></li>
+        <li><a href="https://github.com/Vishaal-sathya" target="_blank">[G] GITHUB</a></li>
+        <!-- Theme Toggle -->
+        <li>
+          <a href="#0" id="theme-toggle" class="theme-toggle-btn"
+            style="display: inline-flex; align-items: center; justify-content: center; padding: 0.6rem;">
+            <svg class="theme-toggle-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Giant Hero Title -->
+    <header id="blog-hero">
+      <h1>Understanding Large Language Models</h1>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="blog-layout">
+
+      <!-- Left Sticky Sidebar -->
+      <aside class="sidebar-col">
+
+        <!-- Sticky Collapsible Title -->
+        <h2 class="sidebar-title">
+          Understanding Large Language Models
+        </h2>
+
+        <!-- Metadata Table -->
+        <div class="metadata-section">
+          <h3 class="metadata-section-label">/ Metadata</h3>
+          <div class="metadata-table">
+            <div class="metadata-row">
+              <span class="metadata-label">Date:</span>
+              <span class="metadata-value">2026.07.15</span>
+            </div>
+            <div class="metadata-row">
+              <span class="metadata-label">Author:</span>
+              <span class="metadata-value-box">Vishaal S</span>
+            </div>
+            <div class="metadata-row">
+              <span class="metadata-label">Reading Time:</span>
+              <span class="metadata-value">7 Min Read</span>
+            </div>
+            <div class="metadata-row">
+              <span class="metadata-label">Categories:</span>
+              <div>
+                <span class="metadata-value-box">LLMs</span>
+                <span class="metadata-value-box">Deep Learning</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Utility Actions -->
+        <div class="sidebar-actions">
+          <div class="action-btn-row">
+            <button class="action-btn" id="copy-markdown-btn">
+              Copy Markdown
+            </button>
+          </div>
+          <div class="action-btn-row">
+            <a href="https://twitter.com/share" class="action-btn" target="_blank">
+              Twitter/X
+            </a>
+            <a href="https://linkedin.com/share" class="action-btn" target="_blank">
+              LinkedIn
+            </a>
+          </div>
+        </div>
+
+      </aside>
+
+      <!-- Right Article Content -->
+      <main class="content-col">
+        <h3 class="content-section-label">/ Article</h3>
+
+        <article class="article-body">
+          <p>
+            Large Language Models (LLMs) have transformed how we build software, process natural language, and design
+            interactive systems. At their core, these models are deep neural networks trained to process, understand,
+            and generate text that reads naturally to humans. To work effectively with LLMs, developers need to
+            understand how they process text, how they are constructed, and what architectural elements make them so
+            capable.
+          </p>
+
+          <div class="takeaways-box">
+            <h4>Key Takeaways</h4>
+            <ul>
+              <li>LLMs are neural networks based on the transformer architecture, utilizing self-attention to process
+                text.</li>
+              <li>Building LLMs requires two steps: broad pretraining on raw text and target-specific fine-tuning.</li>
+              <li>Encoder-only models excel at classification, whereas decoder-only architectures are optimized for text
+                generation.</li>
+            </ul>
+          </div>
+
+          <h2>What is a Large Language Model?</h2>
+          <p>
+            An LLM is a neural network designed to understand, generate, and respond to human language. Modern
+            architectures often contain tens or hundreds of billions of parameters. They're simply the adjustable
+            weights optimized during training to predict the next token in a sequence. What exactly makes these models
+            so powerful? LLMs use the transformer architecture. This design allows the model to pay selective attention
+            to different parts of the input sequence, helping it capture the subtle nuances of human language.
+          </p>
+
+          <div class="blog-image-wrapper">
+            <img class="blog-image" src="../images/blogs/understanding-llms/deep-learning-hierarchy.png"
+              alt="Deep Learning Hierarchy" />
+            <p class="blog-image-caption">LLMs are a specialized application of deep learning, which is a subset of
+              machine learning. While machine learning encompasses algorithms that learn from data, deep learning uses
+              multilayer neural networks to process complex structures like text.</p>
+          </div>
+
+          <h2>How Are LLMs Pretrained and Fine-Tuned?</h2>
+          <p>
+            Building a production-ready LLM involves two distinct training stages: pretraining and fine-tuning.
+          </p>
+          <p>
+            During the pretraining phase, the model is trained on a massive, diverse corpus of unlabeled raw text. Here,
+            raw text simply refers to unstructured, natural language without any annotations or labels. By predicting
+            the next word in a sequence across billions of documents, the model develops a foundational understanding of
+            language structure, grammar, facts, and basic reasoning.
+          </p>
+          <p>
+            Once pretraining is complete, this foundational base model is specialized through fine-tuning. This phase
+            uses smaller, labeled datasets to adapt the model. Developers typically use two categories:
+          </p>
+          <ol style="padding-left: 2.5rem; margin-bottom: 2.5rem; display: flex; flex-direction: column; gap: 1rem;">
+            <li><strong>Instruction Fine-Tuning:</strong> The model is trained on query-response pairs, learning to
+              execute commands or answer questions (for example, translating text or summarizing a document).</li>
+            <li><strong>Classification Fine-Tuning:</strong> The model learns to associate text inputs with categorical
+              labels, which is useful for tasks like spam detection or sentiment analysis.</li>
+          </ol>
+
+          <div class="blog-image-wrapper">
+            <img class="blog-image" src="../images/blogs/understanding-llms/pretraining-finetuning-workflow.png"
+              alt="Pretraining and Fine-tuning Workflow" />
+            <p class="blog-image-caption">Pretraining trains the LLM on next-word prediction using raw text. Fine-tuning
+              subsequently optimizes the model using smaller, task-specific labeled datasets.</p>
+          </div>
+
+          <h2>What is the Transformer Architecture?</h2>
+          <p>
+            Most modern LLMs rely on the transformer, a deep neural network architecture introduced in the 2017 paper <a
+              href="https://arxiv.org/abs/1706.03762" target="_blank">"Attention Is All You Need"</a>. The original
+            transformer design consists of two submodules: an encoder and a decoder. The encoder processes the input
+            text, converting it into numerical vectors (embeddings) that capture contextual meaning. The decoder module
+            takes these encoded vectors and generates the output text.
+          </p>
+
+          <div class="blog-image-wrapper">
+            <img class="blog-image" src="../images/blogs/understanding-llms/encoder-decoder-transformer.png"
+              alt="Original Encoder Decoder Transformer" />
+            <p class="blog-image-caption">The original encoder-decoder transformer configures the encoder to process
+              input text into embeddings, which the decoder uses to generate translated text one word at a time.</p>
+          </div>
+
+          <p>
+            A critical component of this architecture is the self-attention mechanism. How does this attention mechanism
+            work? It allows the model to calculate how much weight to place on every other token in a sequence when
+            processing a specific word. Because it evaluates relationships across the entire sequence simultaneously,
+            self-attention excels at capturing long-range dependencies that traditional recurrent neural networks
+            struggle to process.
+          </p>
+          <p>
+            Over time, researchers adapted the transformer into specialized sub-architectures:
+          </p>
+          <ul
+            style="list-style-type: disc; padding-left: 2.5rem; margin-bottom: 2.5rem; display: flex; flex-direction: column; gap: 1rem;">
+            <li><strong>Encoder-only models (like BERT):</strong> These models focus on masked word prediction, where
+              the network predicts hidden words within a sentence. This approach makes them highly effective for text
+              classification and categorization tasks.</li>
+            <li><strong>Decoder-only models (like GPT):</strong> These models focus on generating coherent, sequential
+              text, which makes them ideal for tasks like machine translation, summarization, and writing computer code.
+            </li>
+          </ul>
+
+          <div class="blog-image-wrapper">
+            <img class="blog-image" src="../images/blogs/understanding-llms/encoder-vs-decoder-models.png"
+              alt="Encoder vs Decoder Models" />
+            <p class="blog-image-caption">Encoder-only models (left, like BERT) predict masked tokens for classification
+              tasks. Decoder-only models (right, like GPT) generate contiguous text sequences.</p>
+          </div>
+
+          <div class="note-box">
+            <strong>Transformers vs. LLMs: What is the Difference?</strong>
+            <p>While the terms "transformer" and "LLM" are often used interchangeably, they aren't identical. The
+              transformer is a general-purpose neural network architecture. While it forms the basis of most modern
+              LLMs, developers also use transformers for computer vision and audio processing. Conversely, some LLMs use
+              alternative designs, such as recurrent or convolutional architectures, rather than transformers.</p>
+          </div>
+
+          <h2>How Does the GPT Architecture Work?</h2>
+          <p>
+            GPT models use a decoder-only architecture. They generate text by predicting one word at a time in an
+            autoregressive fashion, meaning the model feeds its previous outputs back into its input sequence for future
+            predictions. This continuous feedback loop helps ensure the generated text remains coherent over longer
+            passages.
+          </p>
+          <p>
+            As these designs evolved, their scale increased. While the original 2017 transformer used six encoder and
+            decoder layers, GPT-3 scaled up to 96 transformer layers and 175 billion parameters.
+          </p>
+
+          <div class="blog-image-wrapper">
+            <img class="blog-image" src="../images/blogs/understanding-llms/gpt-autoregressive-generation.png"
+              alt="GPT Autoregressive Generation" />
+            <p class="blog-image-caption">GPT uses a decoder-only architecture with unidirectional, left-to-right
+              attention to generate text iteratively, one token at a time.</p>
+          </div>
+
+          <p>
+            Although the original transformer model, consisting of encoder and decoder blocks, was explicitly designed
+            for language translation, GPT models - despite their larger yet simpler decoder-only architecture aimed at
+            next-word prediction - are also capable of performing translation tasks. This capability was initially
+            unexpected to researchers, as it emerged from a model primarily trained on a next-word prediction task,
+            which is a task that did not specifically target translation.
+          </p>
+          <p>
+            The ability to perform tasks that the model wasn’t explicitly trained to perform is called an emergent
+            behavior. This capability isn’t explicitly taught during training but emerges as a natural consequence of
+            the model’s exposure to vast quantities of multilingual data in diverse contexts. The fact that GPT models
+            can “learn” the translation patterns between languages and perform translation tasks even though they
+            weren’t specifically trained for it demonstrates the benefits and capabilities of these largescale,
+            generative language models. We can perform diverse tasks without using diverse models for each.
+          </p>
+          <p>
+            Now that we’ve laid the groundwork for understanding LLMs, in the subsequent blogs let's code one from
+            scratch. We'll start with text tokenization and encoding, code the attention mechanisms and implement the
+            GPT model from scratch.
+          </p>
+        </article>
+      </main>
+
+    </div>
+
+    <!-- Blog Footer -->
+    <footer class="blog-footer">
+      <div class="footer-divider"></div>
+      <div class="footer-content">
+        <div class="footer-left">
+          <p class="footer-copyright">&copy; 2026 Vishaal S. All rights reserved.</p>
+        </div>
+        <div class="footer-middle">
+          <ul class="footer-links">
+            <li><a href="../index.html">[P] PORTFOLIO</a></li>
+            <li><a href="index.html">[B] BLOG</a></li>
+            <li><a href="https://github.com/Vishaal-sathya" target="_blank">[G] GITHUB</a></li>
+          </ul>
+        </div>
+        <div class="footer-right">
+          <a href="#blog-hero" class="back-to-top-link">[↑] Back to top</a>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- JS for Sticky Title Scroll Effect -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const hero = document.getElementById("blog-hero");
+      const sidebar = document.querySelector(".sidebar-col");
+
+      if (hero && sidebar) {
+        const checkScroll = () => {
+          const heroBottom = hero.getBoundingClientRect().bottom;
+          if (heroBottom <= 0) {
+            sidebar.classList.add("has-scrolled");
+          } else {
+            sidebar.classList.remove("has-scrolled");
+          }
+        };
+
+        window.addEventListener("scroll", checkScroll);
+        window.addEventListener("resize", checkScroll);
+        checkScroll();
+      }
+
+      // Copy markdown alert simulation
+      const copyBtn = document.getElementById("copy-markdown-btn");
+      if (copyBtn) {
+        copyBtn.addEventListener("click", () => {
+          alert("Blog content copied as Markdown placeholder to clipboard!");
+        });
+      }
+
+      // Light/Dark Theme Toggle Logic
+      const themeToggle = document.getElementById("theme-toggle");
+      if (themeToggle) {
+        const currentTheme = localStorage.getItem("theme") || "light";
+
+        // Set initial state matching cached theme
+        if (currentTheme === "dark") {
+          updateThemeIcon(themeToggle, "dark");
+        }
+
+        themeToggle.addEventListener("click", function (e) {
+          e.preventDefault();
+          document.body.classList.toggle("dark-mode");
+          const theme = document.body.classList.contains("dark-mode") ? "dark" : "light";
+          localStorage.setItem("theme", theme);
+          updateThemeIcon(themeToggle, theme);
+        });
+      }
+
+      function updateThemeIcon(btn, theme) {
+        const svg = btn.querySelector(".theme-toggle-icon");
+        if (!svg) return;
+        if (theme === "dark") {
+          svg.innerHTML = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`;
+        } else {
+          svg.innerHTML = `
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          `;
+        }
+      }
+    });
+  </script>
+</body>
+
+</html>
