@@ -161,7 +161,8 @@ The blogs engine features a custom landing directory index integrated with premi
     *   **Dark Mode (Negative Polarity)**: Displays the original dark-gray/black background and off-white text, layered with a dark vignette, horizontal scanlines, a glowing rolling beam, and subtle cathode flicker.
 *   **Animations**: The page loads with a full container fade-in-blur animation (`page-fade-in`), followed by the explorer window scale zoom and staggered slide-in transitions for directory nodes. Disables automatically for prefers-reduced-motion.
 
-### 7.2 Blog Articles Layout (`blogs/understanding-large-language-models.html`)
+### 7.2 Blog Articles Layout (`blogs/understanding-large-language-models.html` & `blogs/working-with-text-data.html`)
+*   **Unified Stylesheet Architecture (`css/blog-article.css`)**: Extracted all article layout rules, design system tokens, typography hierarchies (`Castoro` serif headers, `Public Sans` body, `Consolas` code), metadata tables (`/ Metadata`), takeaways/note callouts, code syntax styling, and responsive media queries into a single, shared CSS resource linked by all blog post pages for 100% visual parity.
 *   **Split Grid Columns**: An asymmetrical 30% left / 70% right grid structure handles sidebar metadata and article flow.
 *   **Sticky Sidebar (`.sidebar-col`)**: Affixed dynamically (`position: sticky; top: 4rem;`) to keep metadata and actions persistently available as the user reads.
 *   **Sticky Mini-Title Transition**: Monitors scroll height relative to the main hero title container (`#blog-hero`). Once scrolled past the hero header, the mini-title transitions smoothly (`max-height: 180px; opacity: 1; padding-bottom: 2rem;`) into the sticky sidebar, pushing the metadata rows downward with a fluid transition.
