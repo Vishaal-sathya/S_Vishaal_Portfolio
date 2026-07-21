@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Coding Attention Mechanisms: Part 1 - Simplified Self-Attention - Vishaal S Blog</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Castoro:ital@0;1&family=Public+Sans:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
+
+  <!-- Prism.js for Syntax Highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
+
+  <!-- MathJax for TeX Formula Rendering -->
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+  <!-- Unified Article Stylesheet -->
+  <link rel="stylesheet" href="../css/blog-article.css" />
+</head>
+
+<body>
+  <script>
+    if (localStorage.getItem("theme") === "dark") {
+      document.body.classList.add("dark-mode");
+    }
+  </script>
+
+  <div class="container">
+
+    <!-- Top Navigation -->
+    <nav class="blog-nav">
+      <a class="nav-logo" href="../index.html">Build an LLM from Scratch #3</a>
+      <ul class="nav-links">
+        <li><a href="../index.html">[P] PORTFOLIO</a></li>
+        <li><a href="index.html">[B] BLOG</a></li>
+        <li><a href="https://github.com/Vishaal-sathya" target="_blank">[G] GITHUB</a></li>
+        <!-- Theme Toggle -->
+        <li>
+          <a href="#0" id="theme-toggle" class="theme-toggle-btn"
+            style="display: inline-flex; align-items: center; justify-content: center; padding: 0.6rem;">
+            <svg class="theme-toggle-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Giant Hero Title -->
+    <header id="blog-hero">
+      <h1>Coding Attention Mechanisms: Part 1 - Simplified Self-Attention</h1>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="blog-layout">
+
+      <!-- Left Sticky Sidebar -->
+      <aside class="sidebar-col">
+
+        <!-- Sticky Collapsible Title -->
+        <h2 class="sidebar-title">
+          Coding Attention Mechanisms: Part 1 - Simplified Self-Attention
+        </h2>
+
+        <!-- Metadata Table -->
+        <div class="metadata-section">
+          <h3 class="metadata-section-label">/ Metadata</h3>
+          <div class="metadata-table">
+            <div class="metadata-row">
+              <span class="metadata-label">Date:</span>
+              <span class="metadata-value">2026.07.19</span>
+            </div>
+            <div class="metadata-row">
+              <span class="metadata-label">Author:</span>
+              <span class="metadata-value-box">Vishaal S</span>
+            </div>
+            <div class="metadata-row">
+              <span class="metadata-label">Reading Time:</span>
+              <span class="metadata-value">10 Min Read</span>
+            </div>
+            <div class="metadata-row">
+              <span class="metadata-label">Categories:</span>
+              <div>
+                <span class="metadata-value-box">LLMs</span>
+                <span class="metadata-value-box">Self-Attention</span>
+                <span class="metadata-value-box">PyTorch</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Utility Actions -->
+        <div class="sidebar-actions">
+          <div class="action-btn-row">
+            <button class="action-btn" id="copy-markdown-btn">
+              Copy Markdown
+            </button>
+          </div>
+          <div class="action-btn-row">
+            <a href="https://twitter.com/share" class="action-btn" target="_blank">
+              Twitter/X
+            </a>
+            <a href="https://linkedin.com/share" class="action-btn" target="_blank">
+              LinkedIn
+            </a>
+          </div>
+        </div>
+
+      </aside>
+
+      <!-- Right Content Column -->
+      <main class="content-col">
+        <h3 class="content-section-label">/ Article</h3>
+
+        <article class="article-body">
+          <p>
+            Preparing input text for large language models (LLMs) requires tokenizing raw text into subword units and
+            converting those discrete units into continuous embedding vectors. Once text tokens are mapped into
+            continuous vector spaces, they must be processed by the core neural architecture of the transformer: the
+            attention mechanism. In this article, we begin implementing attention mechanisms from scratch in PyTorch. We
+            will build a simplified variant of self-attention without trainable parameters, establishing the
+            mathematical foundations required for trainable single-head and multi-head attention blocks.
+          </p>
+
+          <!-- Key Takeaways Box -->
+          <div class="takeaways-box">
+            <h4>Key Takeaways</h4>
+            <ul>
+              <li>Self-attention mechanisms calculate dynamic context vectors $z^{(i)}$ by evaluating pairwise
+                relationships across all positions within an input sequence.</li>
+              <li>Traditional encoder-decoder RNNs suffer from information bottlenecks because decoding depends solely
+                on a fixed final hidden state vector.</li>
+              <li>Softmax normalization converts raw scalar dot-product attention scores into positive probability
+                distributions that sum to 1.0.</li>
+              <li>PyTorch matrix operations vectorize self-attention across sequence elements
+                (<code>attn_scores = inputs @ inputs.T</code>), eliminating explicit loops.</li>
+            </ul>
+          </div>
+
+          <h2>Capturing Data Dependencies with Attention Mechanisms</h2>
+
+          <p>
+            Attention mechanisms resolve the fundamental context bottleneck of legacy sequence-to-sequence models by
+            allowing neural networks to dynamically focus on specific input tokens. Before the introduction of the
+            Transformer architecture, recurrent neural networks (RNNs) served as the standard encoder-decoder
+            architecture for natural language translation tasks.
+          </p>
+
+          <div class="blog-image-wrapper">
+            <img class="blog-image"
+              src="../images/blogs/coding-attention-mechanisms-part-1/rnn-encoder-decoder-bottleneck.png"
+              alt="Traditional encoder-decoder RNN architecture bottleneck" />
+          </div>
+
+          <h3>Limitations of Recurrent Neural Networks</h3>
+
+          <p>
+            In a traditional encoder-decoder RNN, the encoder network receives the input sequence one token at a time.
+            At each time step, the encoder updates its internal hidden state vector to encapsulate the sequence context
+            up to that point. The final hidden state vector of the encoder is then passed to the decoder network to
+            initiate sequence generation.
+          </p>
+
+          <p>
+            The major structural limitation of this approach is that the decoder cannot directly access earlier
+            intermediate hidden states generated by the encoder. The entire semantic representation of a long input
+            sequence must be compressed into a single fixed-length hidden vector. For long sentences or complex
+            technical passages, this fixed-size bottleneck leads to severe context loss and performance degradation.
+          </p>
+
+          <h3>Selective Context Access with Bahdanau Attention</h3>
+
+          <p>
+            To address the information bottleneck of standard RNNs, Bahdanau et al. (2014) introduced an attention
+            mechanism for sequence translation. This innovation modified the encoder-decoder framework by enabling the
+            decoder to access all intermediate encoder hidden states selectively at each decoding step.
+          </p>
+
+          <div class="blog-image-wrapper">
+            <img class="blog-image"
+              src="../images/blogs/coding-attention-mechanisms-part-1/bahdanau-selective-attention-decoder.png"
+              alt="Bahdanau selective attention in decoder" />
+            <p class="blog-image-caption">Using an attention mechanism, the text-generating decoder part of the network
+              can access all input tokens selectively. This means that some input tokens are more important than others
+              for generating a given output token. The importance is determined by the attention weights, which we will
+              compute later.</p>
+          </div>
+
+          <p>
+            By assigning scalar attention weights to each encoder state, the network dynamically determines which input
+            tokens are most relevant for generating each target output token.
+          </p>
+
+          <h3>Defining Self-Attention</h3>
+
+          <p>
+            While Bahdanau attention connects separate encoder and decoder networks, self-attention operates within a
+            single sequence. Self-attention enables each token position in an input sequence to attend to every other
+            position in the same sequence. This allows the model to compute context-aware representations by directly
+            relating words within the same context.
+          </p>
+
+          <h2>Attending to Different Parts of the Input with Self-Attention</h2>
+
+          <p>
+            Self-attention computes dynamic weight distributions across input tokens without relying on recurrence. In
+            this section, we implement a simplified form of self-attention that contains no trainable weight matrices.
+            This simplified mechanism establishes the core linear algebra operations used across all modern Transformer
+            variants.
+          </p>
+
+          <div class="blog-image-wrapper">
+            <img class="blog-image"
+              src="../images/blogs/coding-attention-mechanisms-part-1/self-attention-context-vector-overview.png"
+              alt="Self-attention context vector computation overview" />
+            <p class="blog-image-caption">The goal of self-attention is to compute a context vector for each input
+              element that combines information from all other input elements. In this example, we compute the context
+              vector $z^{(2)}$. The importance or contribution of each input element for computing $z^{(2)}$ is determined by the
+              attention weights $\alpha_{21}$ to $\alpha_{2T}$. When computing $z^{(2)}$, the attention weights are calculated with respect to
+              input element $x^{(2)}$ and all other inputs.</p>
+          </div>
+
+          <p>
+            The primary objective of self-attention is to compute an enriched context vector $z^{(i)}$ for each input
+            embedding vector $x^{(i)}$. The resulting context vector $z^{(i)}$ combines information from all tokens
+            $x^{(1)}$ through $x^{(T)}$ according to their relative importance.
+          </p>
+
+          <h3>Step 1: Defining Input Token Embeddings</h3>
+
+          <p>
+            Consider an input sequence consisting of six words: <code>"Your journey starts with one step"</code>.
+            Suppose these tokens have already been mapped to three-dimensional embedding vectors. We represent this
+            input sequence as a PyTorch tensor of shape <code>[6, 3]</code>:
+          </p>
+
+          <pre><code class="language-python">import torch
+
+inputs = torch.tensor(
+  [[0.43, 0.15, 0.89], # Your (x^1)
+   [0.55, 0.87, 0.66], # journey (x^2)
+   [0.57, 0.85, 0.64], # starts (x^3)
+   [0.22, 0.58, 0.33], # with (x^4)
+   [0.77, 0.25, 0.10], # one (x^5)
+   [0.05, 0.80, 0.55]] # step (x^6)
+)</code></pre>
+
+          <p>
+            In this matrix, each row corresponds to an input token vector $x^{(i)} \in \mathbb{R}^3$, where $i \in \{1,
+            \dots, 6\}$.
+          </p>
+
+          <h3>Step 2: Computing Intermediate Attention Scores</h3>
+
+          <p>
+            The first operational step in self-attention is calculating intermediate scalar similarity values $\omega$,
+            called attention scores. We measure similarity by computing the vector dot product between a target query
+            token vector and every token vector in the sequence.
+          </p>
+
+          <div class="blog-image-wrapper">
+            <img class="blog-image"
+              src="../images/blogs/coding-attention-mechanisms-part-1/computing-dot-product-attention-scores.png"
+              alt="Computing dot product attention scores" />
+            <p class="blog-image-caption">The overall goal is to illustrate the computation of the context vector $z^{(2)}$
+              using the second input element, $x^{(2)}$ as a query. This figure shows the first intermediate step, computing
+              the attention scores $\omega$ between the query $x^{(2)}$ and all other input elements as a dot product. (Note that
+              the numbers are truncated to one digit after the decimal point to reduce visual clutter.)</p>
+          </div>
+
+          <p>
+            To calculate the attention scores for the second token $x^{(2)}$ (<code>"journey"</code>), we treat
+            $x^{(2)}$ as the query vector and compute its dot product with all sequence vectors $x^{(1)}$ through
+            $x^{(6)}$:
+          </p>
+
+          <pre><code class="language-python">query = inputs[1]
+attn_scores_2 = torch.empty(inputs.shape[0])
+
+for i, x_i in enumerate(inputs):
+    attn_scores_2[i] = torch.dot(x_i, query)
+
+print(attn_scores_2)</code></pre>
+
+          <pre><code class="language-bash"># Output
+tensor([0.9544, 1.4950, 1.4754, 0.8434, 0.7070, 1.0865])</code></pre>
+
+          <p>
+            The resulting 1D tensor contains six unnormalized scalar scores representing the dot-product similarity
+            between query $x^{(2)}$ and each input token.
+          </p>
+
+          <h3>Step 3: Normalizing Attention Scores with Softmax</h3>
+
+          <p>
+            Raw dot-product attention scores are unnormalized scalars. To convert these scores into a valid probability
+            distribution, we normalize them using the softmax function. Normalization ensures that all attention weights
+            are non-negative and sum to exactly 1.0, maintaining numerical stability during model training.
+          </p>
+
+          <div class="blog-image-wrapper">
+            <img class="blog-image"
+              src="../images/blogs/coding-attention-mechanisms-part-1/softmax-normalizing-attention-scores.png"
+              alt="Softmax normalizing attention scores into attention weights" />
+            <p class="blog-image-caption">After computing the attention scores $\omega_{21}$ to $\omega_{2T}$ with respect to the input
+              query $x^{(2)}$, the next step is to obtain the attention weights $\alpha_{21}$ to $\alpha_{2T}$ by normalizing the attention
+              scores.</p>
+          </div>
+
+          <p>
+            We compute the normalized attention weights $\alpha^{(2)}$ for query $x^{(2)}$ using
+            <code>torch.softmax</code>:
+          </p>
+
+          <pre><code class="language-python">attn_weights_2 = torch.softmax(attn_scores_2, dim=0)
+print("Attention weights:", attn_weights_2)
+print("Sum:", attn_weights_2.sum())</code></pre>
+
+          <pre><code class="language-bash"># Output
+Attention weights: tensor([0.1385, 0.2379, 0.2333, 0.1240, 0.1082, 0.1581])
+Sum: tensor(1.)</code></pre>
+
+          <p>
+            The normalized attention weight vector $\alpha^{(2)}$ indicates that when processing $x^{(2)}$
+            (<code>"journey"</code>), the model assigns the highest weights to $x^{(2)}$ itself (0.2379) and $x^{(3)}$
+            (<code>"starts"</code>, 0.2333), reflecting their high semantic affinity.
+          </p>
+
+          <h3>Step 4: Computing the Enriched Context Vector</h3>
+
+          <p>
+            With normalized attention weights $\alpha^{(2)}$ computed, we calculate the context vector $z^{(2)}$. The
+            context vector is a linear combination of all input vectors $x^{(i)}$, weighted by their corresponding
+            attention probabilities $\alpha_{2i}$.
+          </p>
+
+          <div class="blog-image-wrapper">
+            <img class="blog-image"
+              src="../images/blogs/coding-attention-mechanisms-part-1/weighted-sum-context-vector-computation.png"
+              alt="Computing weighted sum context vector" />
+            <p class="blog-image-caption">The final step, after calculating and normalizing the attention scores to
+              obtain the attention weights for query $x^{(2)}$, is to compute the context vector $z^{(2)}$. This context vector is
+              a combination of all input vectors $x^{(1)}$ to $x^{(T)}$ weighted by the attention weights.</p>
+          </div>
+
+          <p>
+            We multiply each input embedding vector $x^{(i)}$ by its scalar weight $\alpha_{2i}$ and sum the resulting
+            vectors:
+          </p>
+
+          <pre><code class="language-python">query = inputs[1]
+context_vector_2 = torch.zeros(query.shape)
+
+for i, x_i in enumerate(inputs):
+    context_vector_2 += x_i * attn_weights_2[i]
+
+print(context_vector_2)</code></pre>
+
+          <pre><code class="language-bash"># Output
+tensor([0.4419, 0.6515, 0.5683])</code></pre>
+
+          <p>
+            The resulting three-dimensional vector <code>[0.4419, 0.6515, 0.5683]</code> represents the enriched context
+            vector $z^{(2)}$, integrating information from the entire sequence into a single vector representation.
+          </p>
+
+          <h3>Step 5: Vectorizing Self-Attention via Matrix Multiplication</h3>
+
+          <p>
+            Iterating through tokens with Python loops is computationally inefficient for deep learning. We can compute
+            attention scores, normalized weights, and context vectors for all sequence tokens simultaneously using
+            vectorized matrix multiplication.
+          </p>
+
+          <p>
+            First, we compute the full $T \times T$ attention score matrix by multiplying the input matrix $X$ of shape
+            <code>[6, 3]</code> by its transpose $X^T$ of shape <code>[3, 6]</code>:
+          </p>
+
+          $$\text{Attn Scores} = X X^T$$
+
+          <p>
+            Next, we apply softmax along the final dimension (<code>dim=-1</code>) to normalize each row independently.
+            Finally, we multiply the resulting $T \times T$ attention weight matrix by the input embedding matrix $X$ of
+            shape <code>[6, 3]</code> to obtain the complete context matrix $Z$ of shape <code>[6, 3]</code>:
+          </p>
+
+          <pre><code class="language-python"># Compute pairwise dot products for all input vectors
+attn_scores = inputs @ inputs.T
+
+# Normalize across rows (last dimension)
+attn_weights = torch.softmax(attn_scores, dim=-1)
+
+# Compute context vectors for all inputs
+all_context_vecs = attn_weights @ inputs
+
+print(all_context_vecs)</code></pre>
+
+          <pre><code class="language-bash"># Output
+tensor([[0.4421, 0.5931, 0.5790],
+        [0.4419, 0.6515, 0.5683],
+        [0.4431, 0.6496, 0.5671],
+        [0.4304, 0.6298, 0.5510],
+        [0.4671, 0.5910, 0.5266],
+        [0.4177, 0.6503, 0.5645]])</code></pre>
+
+          <p>
+            In PyTorch, setting <code>dim=-1</code> in <code>torch.softmax</code> instructs the function to apply
+            normalization along the last dimension of the tensor. For a two-dimensional tensor of shape
+            <code>[rows, columns]</code>, <code>dim=-1</code> normalizes values across columns for each row
+            independently, guaranteeing that every row in the attention weight matrix sums to 1.0.
+          </p>
+
+          <h2>Conclusion and Next Steps</h2>
+
+          <p>
+            This simplified self-attention mechanism demonstrates how pairwise dot products and softmax normalization
+            combine token representations across a sequence. However, this simplified formulation lacks trainable
+            parameters, meaning it cannot learn task-specific contextual representations from data.
+          </p>
+
+          <p>
+            In the next part of this series, we will introduce parameter matrices for Queries ($W_q$), Keys ($W_k$), and
+            Values ($W_v$). Incorporating these projection matrices enables neural networks to project inputs into
+            dedicated representation spaces, laying the foundation for single-head self-attention and multi-head
+            attention blocks.
+          </p>
+
+        </article>
+      </main>
+
+    </div>
+
+    <!-- Blog Footer -->
+    <footer class="blog-footer">
+      <div class="footer-divider"></div>
+      <div class="footer-content">
+        <div class="footer-left">
+          <p class="footer-copyright">&copy; 2026 Vishaal S. All rights reserved.</p>
+        </div>
+        <div class="footer-middle">
+          <ul class="footer-links">
+            <li><a href="../index.html">[P] PORTFOLIO</a></li>
+            <li><a href="index.html">[B] BLOG</a></li>
+            <li><a href="https://github.com/Vishaal-sathya" target="_blank">[G] GITHUB</a></li>
+          </ul>
+        </div>
+        <div class="footer-right">
+          <a href="#blog-hero" class="back-to-top-link">[↑] Back to top</a>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Prism Syntax Highlighting -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
+  <!-- JS for Sticky Title Scroll & Theme Toggle -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const hero = document.getElementById("blog-hero");
+      const sidebar = document.querySelector(".sidebar-col");
+
+      if (hero && sidebar) {
+        const checkScroll = () => {
+          const heroBottom = hero.getBoundingClientRect().bottom;
+          if (heroBottom <= 0) {
+            sidebar.classList.add("has-scrolled");
+          } else {
+            sidebar.classList.remove("has-scrolled");
+          }
+        };
+
+        window.addEventListener("scroll", checkScroll);
+        window.addEventListener("resize", checkScroll);
+        checkScroll();
+      }
+
+      // Copy markdown alert simulation
+      const copyBtn = document.getElementById("copy-markdown-btn");
+      if (copyBtn) {
+        copyBtn.addEventListener("click", () => {
+          alert("Blog content copied as Markdown placeholder to clipboard!");
+        });
+      }
+
+      // Light/Dark Theme Toggle Logic
+      const themeToggle = document.getElementById("theme-toggle");
+      if (themeToggle) {
+        const currentTheme = localStorage.getItem("theme") || "light";
+
+        if (currentTheme === "dark") {
+          updateThemeIcon(themeToggle, "dark");
+        }
+
+        themeToggle.addEventListener("click", function (e) {
+          e.preventDefault();
+          document.body.classList.toggle("dark-mode");
+          const theme = document.body.classList.contains("dark-mode") ? "dark" : "light";
+          localStorage.setItem("theme", theme);
+          updateThemeIcon(themeToggle, theme);
+        });
+      }
+
+      function updateThemeIcon(btn, theme) {
+        const svg = btn.querySelector(".theme-toggle-icon");
+        if (!svg) return;
+        if (theme === "dark") {
+          svg.innerHTML = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`;
+        } else {
+          svg.innerHTML = `
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          `;
+        }
+      }
+    });
+  </script>
+</body>
+
+</html>
