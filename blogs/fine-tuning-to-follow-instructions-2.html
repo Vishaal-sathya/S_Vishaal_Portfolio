@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fine-Tuning to Follow Instructions Part 2: Training, Extraction, and Automated Evaluation - Vishaal S Blog</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Castoro:ital@0;1&family=Public+Sans:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
+
+  <!-- Prism.js for Syntax Highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
+
+  <!-- MathJax for TeX Formula Rendering -->
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+  <!-- Unified Article Stylesheet -->
+  <link rel="stylesheet" href="../css/blog-article.css" />
+</head>
+
+<body>
+  <script>
+    if (localStorage.getItem("theme") === "dark") {
+      document.body.classList.add("dark-mode");
+    }
+  </script>
+
+  <div class="container">
+
+    <!-- Top Navigation -->
+    <nav class="blog-nav">
+      <a class="nav-logo" href="../index.html">Build an LLM from Scratch #6</a>
+      <ul class="nav-links">
+        <li><a href="../index.html">[P] PORTFOLIO</a></li>
+        <li><a href="index.html">[B] BLOG</a></li>
+        <li><a href="https://github.com/Vishaal-sathya" target="_blank">[G] GITHUB</a></li>
+        <!-- Theme Toggle -->
+        <li>
+          <a href="#0" id="theme-toggle" class="theme-toggle-btn"
+            style="display: inline-flex; align-items: center; justify-content: center; padding: 0.6rem;"
+            aria-label="Toggle Theme">
+            <svg class="theme-toggle-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Giant Hero Title -->
+    <header id="blog-hero">
+      <h1>Fine-Tuning to Follow Instructions Part 2: Training, Extraction, and Automated Evaluation</h1>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="blog-layout">
+
+      <!-- Left Sticky Sidebar -->
+      <aside class="sidebar-col">
+
+        <!-- Sticky Collapsible Title -->
+        <h2 class="sidebar-title">
+          Fine-Tuning to Follow Instructions Part 2: Training, Extraction, and Automated Evaluation
+        </h2>
+
+        <!-- Metadata Table -->
+        <div class="metadata-section">
+          <h3 class="metadata-section-label">/ Metadata</h3>
+          <div class="metadata-table">
+            <div class="metadata-row">
+              <span class="metadata-label">Date:</span>
+              <span class="metadata-value">2026.08.24</span>
+            </div>
+            <div class="metadata-row">
+              <span class="metadata-label">Author:</span>
+              <span class="metadata-value-box">Vishaal S</span>
+            </div>
+            <div class="metadata-row">
+              <span class="metadata-label">Reading Time:</span>
+              <span class="metadata-value">8 Min Read</span>
+            </div>
+            <div class="metadata-row">
+              <span class="metadata-label">Categories:</span>
+              <div>
+                <span class="metadata-value-box">LLMs</span>
+                <span class="metadata-value-box">Self-Attention</span>
+                <span class="metadata-value-box">PyTorch</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Utility Actions -->
+        <div class="sidebar-actions">
+          <div class="action-btn-row">
+            <button class="action-btn" id="copy-markdown-btn">
+              Copy Markdown
+            </button>
+          </div>
+          <div class="action-btn-row">
+            <a href="https://twitter.com/share" class="action-btn" target="_blank">
+              Twitter/X
+            </a>
+            <a href="https://linkedin.com/share" class="action-btn" target="_blank">
+              LinkedIn
+            </a>
+          </div>
+        </div>
+
+      </aside>
+
+      <!-- Right Content Column -->
+      <main class="content-col">
+        <h3 class="content-section-label">/ Article</h3>
+
+        <article class="article-body">
+<p>With the <code>InstructionDataset</code> class and custom collate logic established, we instantiate the PyTorch data loaders. These structures automatically shuffle and organize the batches required for the instruction fine-tuning process.</p>
+<div class="takeaways-box">
+            <h4>Key Takeaways</h4>
+            <ul>
+<li>Instruction datasets integrate into standard data loaders using specialized collate functions to orchestrate dynamic sequence padding and target masking.</li>
+<li>Base pretrained models fail zero-shot instruction tasks, underscoring the absolute necessity of supervised instructional formatting.</li>
+<li>Automated conversational benchmarks, leveraging an auxiliary model as an evaluator, offer a scalable and quantifiable mechanism for assessing generative quality over large test sets.</li>
+            </ul>
+          </div>
+
+<h2>Loading a pretrained LLM</h2>
+<p>We configure the data loaders for the training, validation, and testing phases.</p>
+<pre><code class="language-python">import torch
+from torch.utils.data import DataLoader
+# Assume tokenizer, InstructionDataset, custom_collate_fn, and datasets are defined
+
+num_workers = 0
+batch_size = 8
+torch.manual_seed(123)
+
+train_dataset = InstructionDataset(train_data, tokenizer)
+train_loader = DataLoader(
+    train_dataset,
+    batch_size=batch_size,
+    collate_fn=custom_collate_fn,
+    shuffle=True,
+    drop_last=True,
+    num_workers=num_workers
+)
+
+val_dataset = InstructionDataset(val_data, tokenizer)
+val_loader = DataLoader(
+    val_dataset,
+    batch_size=batch_size,
+    collate_fn=custom_collate_fn,
+    shuffle=False,
+    drop_last=False,
+    num_workers=num_workers
+)
+
+test_dataset = InstructionDataset(test_data, tokenizer)
+test_loader = DataLoader(
+    test_dataset,
+    batch_size=batch_size,
+    collate_fn=custom_collate_fn,
+    shuffle=False,
+    drop_last=False,
+    num_workers=num_workers
+)
+</code></pre>
+<p>Prior to executing instruction fine-tuning, we must load a pretrained baseline architecture. We instantiate a configuration corresponding to the 355-million parameter iteration of GPT-2 and download the external weights.</p>
+<pre><code class="language-python">import os
+import requests
+# Assume GPTModel is defined
+
+GPT_CONFIG = {
+    &quot;vocab_size&quot;: 50257,    # Vocabulary size
+    &quot;context_length&quot;: 1024, # Context length
+    &quot;emb_dim&quot;: 1024,        # Embedding dimension
+    &quot;n_heads&quot;: 16,          # Number of attention heads
+    &quot;n_layers&quot;: 24,         # Number of transformer blocks
+    &quot;drop_rate&quot;: 0.1,       # Dropout rate
+    &quot;qkv_bias&quot;: True        # Query-Key-Value bias
+}
+
+file_name = &quot;gpt2-medium-355M.pth&quot;
+url = f&quot;https://huggingface.co/rasbt/gpt2-from-scratch-pytorch/resolve/main/{file_name}&quot;
+
+if not os.path.exists(file_name):
+    response = requests.get(url, timeout=60)
+    response.raise_for_status()
+    with open(file_name, &quot;wb&quot;) as f:
+        f.write(response.content)
+    print(f&quot;Downloaded to {file_name}&quot;)
+
+model = GPTModel(GPT_CONFIG)
+model.load_state_dict(torch.load(file_name, weights_only=True))
+model.eval()
+
+device = torch.device(&quot;cuda&quot; if torch.cuda.is_available() else &quot;cpu&quot;)
+model.to(device)
+</code></pre>
+<p>We establish a baseline for the model's performance on the validation set prior to optimization. This quantifies the zero-shot instruction capability of the raw pretrained network.</p>
+<pre><code class="language-python">torch.manual_seed(123)
+input_text = format_input(val_data[0])
+print(input_text)
+</code></pre>
+<pre><code class="language-python"># Output
+Below is an instruction that describes a task. Write a response that appropriately completes the request.
+
+### Instruction:
+Convert the active sentence to passive: 'The chef cooks the meal every day.'
+</code></pre>
+<p>We generate a response using the inference function established during pretraining. To isolate the generative output precisely, we subtract the length of the input string from the raw output.</p>
+<pre><code class="language-python"># Assume generate, text_to_token_ids, and token_ids_to_text are defined
+token_ids = generate(
+    model=model,
+    idx=text_to_token_ids(input_text, tokenizer).to(device),
+    max_new_tokens=35,
+    context_size=GPT_CONFIG[&quot;context_length&quot;],
+    eos_id=50256,
+)
+generated_text = token_ids_to_text(token_ids, tokenizer)
+response_text = generated_text[len(input_text):].strip()
+
+print(response_text)
+</code></pre>
+<pre><code class="language-python"># Output
+### Response:
+
+The chef cooks the meal every day.
+
+### Instruction:
+
+Convert the active sentence to passive: 'The chef cooks the
+</code></pre>
+<p>The output confirms the baseline model lacks the architectural conditioning to parse instructions. It mirrors the input syntax rather than executing the linguistic transformation.</p>
+<h2>Fine-tuning the LLM on instruction data</h2>
+<p>We calculate the initial cross-entropy loss for the training and validation splits.</p>
+<pre><code class="language-python"># Assume calc_loss_loader is defined
+model.to(device)
+torch.manual_seed(123)
+
+with torch.no_grad():
+    train_loss = calc_loss_loader(
+        train_loader, model, device, num_batches=5
+    )
+    val_loss = calc_loss_loader(
+        val_loader, model, device, num_batches=5
+    )
+
+print(&quot;Training loss:&quot;, train_loss)
+print(&quot;Validation loss:&quot;, val_loss)
+</code></pre>
+<pre><code class="language-python"># Output
+Training loss: 3.82590913772583
+Validation loss: 3.7619335651397705
+</code></pre>
+<p>We utilize the <code>train_model_simple</code> function introduced during unsupervised pretraining to minimize this loss via the AdamW optimizer.</p>
+<pre><code class="language-python">import time
+# Assume train_model_simple is defined
+
+start_time = time.time()
+torch.manual_seed(123)
+
+optimizer = torch.optim.AdamW(
+    model.parameters(), lr=0.00005, weight_decay=0.1
+)
+num_epochs = 2
+
+train_losses, val_losses, tokens_seen = train_model_simple(
+    model, train_loader, val_loader, optimizer, device,
+    num_epochs=num_epochs, eval_freq=5, eval_iter=5,
+    start_context=format_input(val_data[0]), tokenizer=tokenizer
+)
+
+end_time = time.time()
+execution_time_minutes = (end_time - start_time) / 60
+print(f&quot;Training completed in {execution_time_minutes:.2f} minutes.&quot;)
+</code></pre>
+<pre><code class="language-python"># Output
+Ep 2 (Step 000220): Train loss 0.349, Val loss 0.649
+Ep 2 (Step 000225): Train loss 0.409, Val loss 0.659
+Ep 2 (Step 000230): Train loss 0.350, Val loss 0.649
+Below is an instruction that describes a task. Write a response that appropriately completes the request.  ### Instruction: Convert the active sentence to passive: 'The chef cooks the meal every day.'  ### Response: The meal is cooked every day by the chef.&lt;|endoftext|&gt;The following is an instruction that describes a task. Write a response that appropriately completes the request.  ### Instruction: What is the capital of the United Kingdom
+Training completed in 3.47 minutes.
+</code></pre>
+<p>The sample output evaluated mid-training demonstrates correct execution of the structural instruction. The model correctly transforms the active voice input to a passive construction.</p>
+<p>We map the loss trajectories over the recorded steps to ensure systematic convergence.</p>
+<pre><code class="language-python"># Assume plot_losses is defined
+epochs_tensor = torch.linspace(0, num_epochs, len(train_losses))
+plot_losses(epochs_tensor, tokens_seen, train_losses, val_losses)
+</code></pre>
+<div class="blog-image-wrapper">
+            <img class="blog-image" src="../images/blogs/fine-tuning-to-follow-instructions-2/Pasted image 20260822120828.png" alt="The training and validation loss trends over two epochs. The solid line represents the training loss, exhibiting a sharp decrease prior to stabilization. The dotted line denotes the validation loss, which mirrors the training trend without severe divergence." />
+            <p class="blog-image-caption">The training and validation loss trends over two epochs. The solid line represents the training loss, exhibiting a sharp decrease prior to stabilization. The dotted line denotes the validation loss, which mirrors the training trend without severe divergence.</p>
+          </div>
+
+<h2>Extracting and saving responses</h2>
+<p>We iterate across the distinct test dataset to isolate the model's generated responses for rigorous assessment.</p>
+<pre><code class="language-python">torch.manual_seed(123)
+
+for entry in test_data[:3]:
+    input_text = format_input(entry)
+    token_ids = generate(
+        model=model,
+        idx=text_to_token_ids(input_text, tokenizer).to(device),
+        max_new_tokens=256,
+        context_size=GPT_CONFIG[&quot;context_length&quot;],
+        eos_id=50256
+    )
+    generated_text = token_ids_to_text(token_ids, tokenizer)
+
+    response_text = (
+        generated_text[len(input_text):]
+        .replace(&quot;### Response:&quot;, &quot;&quot;)
+        .strip()
+    )
+
+    print(input_text)
+    print(f&quot;\nCorrect response:\n&gt;&gt; {entry['output']}&quot;)
+    print(f&quot;\nModel response:\n&gt;&gt; {response_text.strip()}&quot;)
+    print(&quot;-------&quot;)
+</code></pre>
+<pre><code class="language-python"># Output
+Below is an instruction that describes a task. Write a response that appropriately completes the request.
+
+### Instruction:
+Rewrite the sentence using a simile.
+
+### Input:
+The car is very fast.
+
+Correct response:
+&gt;&gt; The car is as fast as lightning.
+
+Model response:
+&gt;&gt; The car is as fast as a bullet.
+-------
+Below is an instruction that describes a task. Write a response that appropriately completes the request.
+
+### Instruction:
+What type of cloud is typically associated with thunderstorms?
+
+Correct response:
+&gt;&gt; The type of cloud typically associated with thunderstorms is cumulonimbus.
+
+Model response:
+&gt;&gt; A thunderstorm is a type of storm that typically produces a thunderstorm-like gust of wind.
+-------
+Below is an instruction that describes a task. Write a response that appropriately completes the request.
+
+### Instruction:
+Name the author of 'Pride and Prejudice'.
+
+Correct response:
+&gt;&gt; Jane Austen.
+
+Model response:
+&gt;&gt; The author of 'Pride and Prejudice' is Jane Austen.
+-------
+</code></pre>
+<p>Instruction fine-tuning does not yield simple categorical correctness percentages like classification tasks. Evaluating conversational models utilizes multiple methodologies:
+- Standardized multi-choice evaluation (e.g., MMLU).
+- Human preference evaluation frameworks (e.g., LMSYS Chatbot Arena).
+- Automated LLM-as-a-judge algorithmic evaluations.</p>
+<p>To perform a scalable evaluation, we extract responses for the entire test set and serialize them to a JSON file.</p>
+<pre><code class="language-python">import json
+from tqdm import tqdm
+
+for i, entry in tqdm(enumerate(test_data), total=len(test_data)):
+    input_text = format_input(entry)
+    token_ids = generate(
+        model=model,
+        idx=text_to_token_ids(input_text, tokenizer).to(device),
+        max_new_tokens=256,
+        context_size=GPT_CONFIG[&quot;context_length&quot;],
+        eos_id=50256
+    )
+    generated_text = token_ids_to_text(token_ids, tokenizer)
+
+    response_text = (
+        generated_text[len(input_text):]
+        .replace(&quot;### Response:&quot;, &quot;&quot;)
+        .strip()
+    )
+    test_data[i][&quot;model_response&quot;] = response_text
+
+with open(&quot;instruction-data-with-response.json&quot;, &quot;w&quot;) as file:
+    json.dump(test_data, file, indent=4) 
+</code></pre>
+<p>We persist the optimized parameter dictionary to disk.</p>
+<pre><code class="language-python">import re
+
+file_name = f&quot;{re.sub(r'[ ()]', '', 'gpt2-medium355M') }-sft.pth&quot;
+torch.save(model.state_dict(), file_name)
+print(f&quot;Model saved as {file_name}&quot;)
+</code></pre>
+<h2>Evaluating the fine-tuned LLM</h2>
+<p>We execute an automated LLM-as-a-judge evaluation utilizing a local Llama 3 model hosted via Ollama REST API. This secondary model scores the generative output of our fine-tuned network.</p>
+<pre><code class="language-python">import urllib.request
+
+def query_model(prompt, model=&quot;llama3&quot;, url=&quot;http://localhost:11434/api/chat&quot;):
+    data = {
+        &quot;model&quot;: model,
+        &quot;messages&quot;: [
+            {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: prompt}
+        ],
+        &quot;options&quot;: {
+            &quot;seed&quot;: 123,
+            &quot;temperature&quot;: 0,
+            &quot;num_ctx&quot;: 2048
+        }
+    }
+
+    payload = json.dumps(data).encode(&quot;utf-8&quot;)
+    request = urllib.request.Request(
+        url,
+        data=payload,
+        method=&quot;POST&quot;
+    )
+    request.add_header(&quot;Content-Type&quot;, &quot;application/json&quot;)
+
+    response_data = &quot;&quot;
+    with urllib.request.urlopen(request) as response:
+        while True:
+            line = response.readline().decode(&quot;utf-8&quot;)
+            if not line:
+                break
+            response_json = json.loads(line)
+            response_data += response_json[&quot;message&quot;][&quot;content&quot;]
+
+    return response_data
+</code></pre>
+<p>We define an iterative metric function that prompts the evaluator model to score each local response on a deterministic 100-point integer scale.</p>
+<pre><code class="language-python">def generate_model_scores(json_data, json_key, model=&quot;llama3&quot;):
+    scores = []
+    for entry in tqdm(json_data, desc=&quot;Scoring entries&quot;):
+        prompt = (
+            f&quot;Given the input `{format_input(entry)}` &quot;
+            f&quot;and correct output `{entry['output']}`, &quot;
+            f&quot;score the model response `{entry[json_key]}`&quot;
+            f&quot; on a scale from 0 to 100, where 100 is the best score. &quot;
+            f&quot;Respond with the integer number only.&quot;
+        )
+        score = query_model(prompt, model)
+        try:
+            scores.append(int(score))
+        except ValueError:
+            print(f&quot;Could not convert score: {score}&quot;)
+            continue
+
+    return scores
+</code></pre>
+<p>We execute this algorithmic scoring across the aggregate test array.</p>
+<pre><code class="language-python">scores = generate_model_scores(test_data, &quot;model_response&quot;)
+print(f&quot;Number of scores: {len(scores)} of {len(test_data)}&quot;)
+print(f&quot;Average score: {sum(scores)/len(scores):.2f}\n&quot;)
+</code></pre>
+<pre><code class="language-python"># Output
+Number of scores: 110 of 110
+Average score: 50.32
+</code></pre>
+<p>The resulting evaluation average demonstrates a baseline instruction adherence score. The automated metric pipeline establishes a quantifiable framework for subsequent architecture testing and hyperparameter adjustments.</p>
+        </article>
+      </main>
+
+    </div>
+
+    <!-- Blog Footer -->
+    <footer class="blog-footer">
+      <div class="footer-divider"></div>
+      <div class="footer-content">
+        <div class="footer-left">
+          <p class="footer-copyright">&copy; 2026 Vishaal S. All rights reserved.</p>
+        </div>
+        <div class="footer-middle">
+          <ul class="footer-links">
+            <li><a href="../index.html">[P] PORTFOLIO</a></li>
+            <li><a href="index.html">[B] BLOG</a></li>
+            <li><a href="https://github.com/Vishaal-sathya" target="_blank">[G] GITHUB</a></li>
+          </ul>
+        </div>
+        <div class="footer-right">
+          <a href="#blog-hero" class="back-to-top-link">[↑] Back to top</a>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Prism Syntax Highlighting -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+  <!-- Script for Markdown source copying -->
+  <script type="text/plain" id="markdown-content">---
+title: "Coding Attention Mechanisms Part 4: Implementing Multi-Head Attention"
+description: "A step-by-step implementation of multi-head attention wrapper and a computationally efficient tensor-parallel multi-head attention module using PyTorch."
+author: "PhD Author"
+date: "2026-07-22"
+---
+
+The term “multi-head” refers to dividing the attention mechanism into multiple “heads,” each operating independently. In this context, a single causal attention module can be considered single-head attention, where there is only one set of attention weights processing the input sequentially.
+
+> **Key Takeaways**
+> - Multi-head attention routes inputs through multiple independent attention layers, each with distinct weight parameters.
+> - Processing heads in parallel requires specific tensor reshaping and transposition to preserve token boundaries in memory.
+> - Transitioning from a sequential module list wrapper to a unified tensor parallel implementation significantly improves computational efficiency.
+
+---
+
+## Stacking multiple single-head attention layers
+
+In practical terms, implementing multi-head attention involves creating multiple instances of the self-attention mechanism, each with its own weights, and then combining their outputs.
+
+![[Pasted image 20260721185453.png]]
+*The multi-head attention module includes two single-head attention modules stacked on top of each other. So, instead of using a single matrix Wv for computing the value matrices, in a multi-head attention module with two heads, we now have two value weight matrices: Wv1 and Wv2. The same applies to the other weight matrices, WQ and Wk. We obtain two sets of context vectors Z1 and Z2 that we can combine into a single context vector matrix Z.*
+
+In code, we can achieve this by implementing a simple `MultiHeadAttentionWrapper` class that stacks multiple instances of our previously implemented `CausalAttention` module. We define all prerequisites, including input tensors and the `CausalAttention` class, to ensure the code block is fully executable:
+
+```python
+import torch
+import torch.nn as nn
+
+inputs = torch.tensor(
+ [[0.43, 0.15, 0.89], # Your (x^1)
+  [0.55, 0.87, 0.66], # journey (x^2)
+  [0.57, 0.85, 0.64], # starts (x^3)
+  [0.22, 0.58, 0.33], # with (x^4)
+  [0.77, 0.25, 0.10], # one (x^5)
+  [0.05, 0.80, 0.55]] # step (x^6)
+)
+batch = torch.stack((inputs, inputs), dim=0)
+
+class CausalAttention(nn.Module):
+    def __init__(self, d_in, d_out, context_length, dropout, qkv_bias=False):
+        super().__init__()
+        self.d_out = d_out
+        self.W_query = nn.Linear(d_in, d_out, bias=qkv_bias)
+        self.W_key = nn.Linear(d_in, d_out, bias=qkv_bias)
+        self.W_value = nn.Linear(d_in, d_out, bias=qkv_bias)
+        self.dropout = nn.Dropout(dropout)
+        self.register_buffer(
+            'mask',
+            torch.triu(torch.ones(context_length, context_length), diagonal=1)
+        )
+
+    def forward(self, x):
+        b, num_tokens, d_in = x.shape
+        keys = self.W_key(x)
+        queries = self.W_query(x)
+        values = self.W_value(x)
+
+        attn_scores = queries @ keys.transpose(1, 2)
+        attn_scores.masked_fill_(self.mask.bool()[:num_tokens, :num_tokens], -torch.inf)
+        attn_weights = torch.softmax(attn_scores / keys.shape[-1]**0.5, dim=-1)
+        attn_weights = self.dropout(attn_weights)
+        context_vec = attn_weights @ values
+
+        return context_vec
+
+class MultiHeadAttentionWrapper(nn.Module):
+    def __init__(self, d_in, d_out, context_length, dropout, num_heads, qkv_bias=False):
+        super().__init__()
+        self.heads = nn.ModuleList(
+            [CausalAttention(d_in, d_out, context_length, dropout, qkv_bias) 
+                for _ in range(num_heads)]
+        )
+
+    def forward(self, x):
+        return torch.cat([head(x) for head in self.heads], dim=-1)
+
+torch.manual_seed(123)
+context_length = batch.shape[1] # This is the number of tokens
+d_in, d_out = 3, 2
+
+mha = MultiHeadAttentionWrapper(
+ d_in, d_out, context_length, 0.0, num_heads=2
+)
+context_vecs = mha(batch)
+print(context_vecs)
+```
+```python
+# Output
+tensor([[[-0.4519,  0.2216,  0.4772,  0.1063],
+         [-0.5874,  0.0058,  0.5891,  0.3257],
+         [-0.6300, -0.0632,  0.6202,  0.3860],
+         [-0.5675, -0.0843,  0.5478,  0.3589],
+         [-0.5526, -0.0981,  0.5321,  0.3428],
+         [-0.5299, -0.1081,  0.5077,  0.3493]],
+
+        [[-0.4519,  0.2216,  0.4772,  0.1063],
+         [-0.5874,  0.0058,  0.5891,  0.3257],
+         [-0.6300, -0.0632,  0.6202,  0.3860],
+         [-0.5675, -0.0843,  0.5478,  0.3589],
+         [-0.5526, -0.0981,  0.5321,  0.3428],
+         [-0.5299, -0.1081,  0.5077,  0.3493]]], grad_fn=<CatBackward0>)
+```
+
+Up to this point, we have implemented a `MultiHeadAttentionWrapper` that combined multiple single-head attention modules. However, these are processed sequentially via list comprehension inside the forward method.
+
+In contrast, the following `MultiHeadAttention` class integrates the multi-head functionality within a single class. It splits the input into multiple heads by reshaping the projected query, key, and value tensors, and then combines the results from these heads after computing attention.
+
+---
+
+## Implementing the Efficient MultiHeadAttention Class
+
+```python
+import torch
+import torch.nn as nn
+
+class MultiHeadAttention(nn.Module):
+    def __init__(self, d_in, d_out, context_length, dropout, num_heads, qkv_bias=False):
+        super().__init__()
+        assert (d_out % num_heads == 0), "d_out must be divisible by num_heads"
+
+        self.d_out = d_out
+        self.num_heads = num_heads
+        self.head_dim = d_out // num_heads
+        self.W_query = nn.Linear(d_in, d_out, bias=qkv_bias)
+        self.W_key = nn.Linear(d_in, d_out, bias=qkv_bias)
+        self.W_value = nn.Linear(d_in, d_out, bias=qkv_bias)
+        self.dropout = nn.Dropout(dropout)
+        self.out_proj = nn.Linear(d_out, d_out)
+        self.register_buffer('mask', torch.triu(torch.ones(context_length, context_length), diagonal=1))
+
+    def forward(self, x):
+        b, num_tokens, d_in = x.shape
+        keys = self.W_key(x)
+        queries = self.W_query(x)
+        values = self.W_value(x)
+
+        keys = keys.view(b, num_tokens, self.num_heads, self.head_dim)
+        queries = queries.view(b, num_tokens, self.num_heads, self.head_dim)
+        values = values.view(b, num_tokens, self.num_heads, self.head_dim)
+
+        keys = keys.transpose(1, 2)
+        queries = queries.transpose(1, 2)
+        values = values.transpose(1, 2)
+
+        attn_scores = queries @ keys.transpose(2, 3)
+        mask_bool = self.mask.bool()[:num_tokens, :num_tokens]
+        attn_scores.masked_fill_(mask_bool, -torch.inf)
+        attn_weights = torch.softmax(attn_scores / keys.shape[-1]**0.5, dim=-1)
+        attn_weights = self.dropout(attn_weights)
+
+        context_vec = (attn_weights @ values).transpose(1, 2)
+        context_vec = context_vec.contiguous().view(b, num_tokens, self.d_out)
+        context_vec = self.out_proj(context_vec)
+
+        return context_vec
+```
+
+---
+
+## Tensor Reshaping and Memory Layout
+
+What we are trying to do is to create weight parameters of size num_tokens x head_dim for each head. So if we have two heads, we will have two W_key operations of size num_tokens x head_dim for each batch.
+
+Initially we have a single weight matrix of dimension batch x num_tokens x d_out and we convert it to batch x num_heads x num_tokens x head_dim, but if you notice we are not directly reshaping it to the final dimensions. We first reshape it to batch x num_tokens x num_heads x head_dim and then we transpose the second and third dimensions to get the result.
+
+The reason is because the matrix is arranged in memory as follows:
+
+```
+Batch0
+
+Token1
+[embeddings]
+
+Token2
+[embeddings]
+
+Token3
+[embeddings]
+
+Token4
+[embeddings]
+```
+
+So we now split every token embedding across the number of heads we want:
+
+```
+Batch0
+
+Token1
+[head1_embeddings, head2_embeddings, head3_embeddings]
+
+Token2
+[head1_embeddings, head2_embeddings, head3_embeddings]
+
+Token3
+[head1_embeddings, head2_embeddings, head3_embeddings]
+
+Token4
+[head1_embeddings, head2_embeddings, head3_embeddings]
+```
+
+If we tried to reshape it directly to batch x num_heads x num_tokens x head_dim, PyTorch would interpret the matrix as:
+
+```
+Batch
+
+Head0
+
+Token1
+Token2
+...
+
+Head1
+...
+```
+
+But the memory is **not arranged that way**.
+
+The first set of numbers belongs completely to token 1, not to head 1 across all tokens. So the heads would become garbage mixtures of different tokens.
+
+---
+
+## Merging Attention Heads and Output Projection
+
+The final phase of the `MultiHeadAttention` forward pass merges the independent attention heads back into a single unified context tensor for each token. Initially, batched matrix multiplication computes context vectors for each head, resulting in a tensor of dimension `(batch, heads, tokens, head_dim)` (for example, `(2, 12, 4, 64)`). To group the outputs of different heads by token, we transpose the tensor dimensions to `(batch, tokens, heads, head_dim)` (yielding `(2, 4, 12, 64)`). Because this transposition only alters the logical layout indexing (strides) without copying data, we call `.contiguous()` to physically rearrange the data in memory. This contiguity is required before utilizing `.view()`, which flattens the last two dimensions to concatenate the heads into a unified embedding dimension of size `self.d_out` ($12 \times 64 = 768$), producing a shape of `(batch, tokens, d_out)` (yielding `(2, 4, 768)`).
+
+For a single token, this flattening and concatenation process modifies the memory layout as follows:
+
+```text
+Before view() [Independent Attention Heads]:
+Head 1:   [64 values]
+Head 2:   [64 values]
+...
+Head 12:  [64 values]
+
+After view() [Concatenated Context Vector]:
+[ Head 1 (64) | Head 2 (64) | ... | Head 12 (64) ]  --->  768 dimensions
+```
+
+Once the heads are concatenated, the combined representation is passed through a linear projection layer `self.out_proj` of shape `(d_out, d_out)` (representing `nn.Linear(768, 768)`). This projection layer is critical because a direct concatenation simply groups the independent attention outputs adjacent to one another without interaction. The projection adds learnable weights to this step so if for example head one learns grammar, head 2 learns long-range dependencies etc, the projection matrix can learn things like 40% of head 1 + 20% of head 2...
+
+---
+
+## Verifying the Multi-Head Attention Output
+
+The `MultiHeadAttention` class can be used similarly to the `SelfAttention` and `CausalAttention` classes we implemented earlier:
+
+```python
+# Assuming 'inputs' and 'batch' are defined as before:
+torch.manual_seed(123)
+batch_size, context_length, d_in = batch.shape
+d_out = 2
+mha = MultiHeadAttention(d_in, d_out, context_length, 0.0, num_heads=2)
+context_vecs = mha(batch)
+print(context_vecs)
+print("context_vecs.shape:", context_vecs.shape)
+```
+```python
+# Output
+tensor([[[0.3190, 0.4858],
+         [0.2943, 0.3897],
+         [0.2856, 0.3593],
+         [0.2693, 0.3873],
+         [0.2639, 0.3928],
+         [0.2575, 0.4028]],
+
+        [[0.3190, 0.4858],
+         [0.2943, 0.3897],
+         [0.2856, 0.3593],
+         [0.2693, 0.3873],
+         [0.2639, 0.3928],
+         [0.2575, 0.4028]]], grad_fn=<ViewBackward0>)
+context_vecs.shape: torch.Size([2, 6, 2])
+```
+
+We have now implemented the `MultiHeadAttention` class that we will use when we implement and train the LLM. Note that while the code is fully functional, we used relatively small embedding sizes and numbers of attention heads to keep the outputs readable.
+
+For comparison, the smallest GPT-2 model (117 million parameters) has 12 attention heads and a context vector embedding size of 768. The largest GPT-2 model (1.5 billion parameters) has 25 attention heads and a context vector embedding size of 1,600. The embedding sizes of the token inputs and context embeddings are the same in GPT models (d_in = d_out).</script>
+
+  <!-- JS for Sticky Title Scroll, Theme Toggle, & Copy Markdown -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const hero = document.getElementById("blog-hero");
+      const sidebar = document.querySelector(".sidebar-col");
+
+      if (hero && sidebar) {
+        const checkScroll = () => {
+          const heroBottom = hero.getBoundingClientRect().bottom;
+          if (heroBottom <= 0) {
+            sidebar.classList.add("has-scrolled");
+          } else {
+            sidebar.classList.remove("has-scrolled");
+          }
+        };
+
+        window.addEventListener("scroll", checkScroll);
+        window.addEventListener("resize", checkScroll);
+        checkScroll();
+      }
+
+      // Copy markdown functionality using script tag content
+      const copyBtn = document.getElementById("copy-markdown-btn");
+      if (copyBtn) {
+        copyBtn.addEventListener("click", () => {
+          const markdownText = document.getElementById("markdown-content").textContent.trim();
+          navigator.clipboard.writeText(markdownText).then(() => {
+            const originalText = copyBtn.textContent;
+            copyBtn.textContent = "Copied!";
+            copyBtn.style.borderColor = "var(--color-1)";
+            copyBtn.style.color = "var(--color-1)";
+            setTimeout(() => {
+              copyBtn.textContent = originalText;
+              copyBtn.style.borderColor = "";
+              copyBtn.style.color = "";
+            }, 2000);
+          }).catch(err => {
+            console.error('Failed to copy markdown: ', err);
+            alert("Could not copy markdown to clipboard automatically.");
+          });
+        });
+      }
+
+      // Light/Dark Theme Toggle Logic
+      const themeToggle = document.getElementById("theme-toggle");
+      if (themeToggle) {
+        const currentTheme = localStorage.getItem("theme") || "light";
+
+        if (currentTheme === "dark") {
+          updateThemeIcon(themeToggle, "dark");
+        }
+
+        themeToggle.addEventListener("click", function (e) {
+          e.preventDefault();
+          document.body.classList.toggle("dark-mode");
+          const theme = document.body.classList.contains("dark-mode") ? "dark" : "light";
+          localStorage.setItem("theme", theme);
+          updateThemeIcon(themeToggle, theme);
+        });
+      }
+
+      function updateThemeIcon(btn, theme) {
+        const svg = btn.querySelector(".theme-toggle-icon");
+        if (!svg) return;
+        if (theme === "dark") {
+          svg.innerHTML = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`;
+        } else {
+          svg.innerHTML = `
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          `;
+        }
+      }
+    });
+  </script>
+</body>
+
+</html>

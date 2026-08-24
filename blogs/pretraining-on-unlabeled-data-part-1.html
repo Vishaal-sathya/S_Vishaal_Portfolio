@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pretraining on Unlabeled Data Part 1: Text Generation Loss and Evaluation - Vishaal S Blog</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Castoro:ital@0;1&family=Public+Sans:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
+
+  <!-- Prism.js for Syntax Highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
+
+  <!-- MathJax for TeX Formula Rendering -->
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+  <!-- Unified Article Stylesheet -->
+  <link rel="stylesheet" href="../css/blog-article.css" />
+</head>
+
+<body>
+  <script>
+    if (localStorage.getItem("theme") === "dark") {
+      document.body.classList.add("dark-mode");
+    }
+  </script>
+
+  <div class="container">
+
+    <!-- Top Navigation -->
+    <nav class="blog-nav">
+      <a class="nav-logo" href="../index.html">Build an LLM from Scratch #6</a>
+      <ul class="nav-links">
+        <li><a href="../index.html">[P] PORTFOLIO</a></li>
+        <li><a href="index.html">[B] BLOG</a></li>
+        <li><a href="https://github.com/Vishaal-sathya" target="_blank">[G] GITHUB</a></li>
+        <!-- Theme Toggle -->
+        <li>
+          <a href="#0" id="theme-toggle" class="theme-toggle-btn"
+            style="display: inline-flex; align-items: center; justify-content: center; padding: 0.6rem;"
+            aria-label="Toggle Theme">
+            <svg class="theme-toggle-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Giant Hero Title -->
+    <header id="blog-hero">
+      <h1>Pretraining on Unlabeled Data Part 1: Text Generation Loss and Evaluation</h1>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="blog-layout">
+
+      <!-- Left Sticky Sidebar -->
+      <aside class="sidebar-col">
+
+        <!-- Sticky Collapsible Title -->
+        <h2 class="sidebar-title">
+          Pretraining on Unlabeled Data Part 1: Text Generation Loss and Evaluation
+        </h2>
+
+        <!-- Metadata Table -->
+        <div class="metadata-section">
+          <h3 class="metadata-section-label">/ Metadata</h3>
+          <div class="metadata-table">
+            <div class="metadata-row">
+              <span class="metadata-label">Date:</span>
+              <span class="metadata-value">2026.08.24</span>
+            </div>
+            <div class="metadata-row">
+              <span class="metadata-label">Author:</span>
+              <span class="metadata-value-box">Vishaal S</span>
+            </div>
+            <div class="metadata-row">
+              <span class="metadata-label">Reading Time:</span>
+              <span class="metadata-value">8 Min Read</span>
+            </div>
+            <div class="metadata-row">
+              <span class="metadata-label">Categories:</span>
+              <div>
+                <span class="metadata-value-box">LLMs</span>
+                <span class="metadata-value-box">Self-Attention</span>
+                <span class="metadata-value-box">PyTorch</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Utility Actions -->
+        <div class="sidebar-actions">
+          <div class="action-btn-row">
+            <button class="action-btn" id="copy-markdown-btn">
+              Copy Markdown
+            </button>
+          </div>
+          <div class="action-btn-row">
+            <a href="https://twitter.com/share" class="action-btn" target="_blank">
+              Twitter/X
+            </a>
+            <a href="https://linkedin.com/share" class="action-btn" target="_blank">
+              LinkedIn
+            </a>
+          </div>
+        </div>
+
+      </aside>
+
+      <!-- Right Content Column -->
+      <main class="content-col">
+        <h3 class="content-section-label">/ Article</h3>
+
+        <article class="article-body">
+<p>We now configure the large language model and review the text generation process established in the previous section. We adjust the configuration to facilitate training on standard hardware.</p>
+<div class="takeaways-box">
+            <h4>Key Takeaways</h4>
+            <ul>
+<li>Cross-entropy loss measures the performance of generated text by comparing the model's predicted probability distributions to the actual target tokens.</li>
+<li>Perplexity provides an interpretable evaluation metric derived directly from the exponential of the cross-entropy loss.</li>
+<li>Evaluating the untrained model on training and validation datasets establishes a baseline loss before initiating the pretraining process.</li>
+            </ul>
+          </div>
+
+<h2>Model initialization and utility functions</h2>
+<p>We initialize the model using a configuration dictionary. The primary adjustment compared to the previous architectural configuration is a reduction in the context length from 1024 to 256 tokens. This modification reduces the computational memory demands of training the model, making it possible to execute the training process on a standard workstation.</p>
+<pre><code class="language-python">import torch
+from chapter04 import GPTModel
+
+GPT_CONFIG_124M = {
+    &quot;vocab_size&quot;: 50257,
+    &quot;context_length&quot;: 256,
+    &quot;emb_dim&quot;: 768,
+    &quot;n_heads&quot;: 12,
+    &quot;n_layers&quot;: 12,
+    &quot;drop_rate&quot;: 0.1,
+    &quot;qkv_bias&quot;: False
+}
+
+torch.manual_seed(123)
+model = GPTModel(GPT_CONFIG_124M)
+model.eval()
+</code></pre>
+<p>We introduce two utility functions, <code>text_to_token_ids</code> and <code>token_ids_to_text</code>, which facilitate the conversion between human-readable text and numerical token representations.</p>
+<div class="blog-image-wrapper">
+            <img class="blog-image" src="../images/blogs/pretraining-on-unlabeled-data-part-1/Pasted image 20260811112200.png" alt="Generating text involves encoding text into token IDs that the LLM processes into logit vectors. The logit vectors are then converted back into token IDs and detokenized into a text representation." />
+            <p class="blog-image-caption">Generating text involves encoding text into token IDs that the LLM processes into logit vectors. The logit vectors are then converted back into token IDs and detokenized into a text representation.</p>
+          </div>
+
+<pre><code class="language-python">def text_to_token_ids(text, tokenizer):
+    encoded = tokenizer.encode(text, allowed_special={'&lt;|endoftext|&gt;'})
+    encoded_tensor = torch.tensor(encoded).unsqueeze(0)
+    return encoded_tensor
+
+def token_ids_to_text(token_ids, tokenizer):
+    flat = token_ids.squeeze(0)
+    return tokenizer.decode(flat.tolist())
+</code></pre>
+<p>We test these functions by generating text with our untrained model.</p>
+<pre><code class="language-python">import tiktoken
+from chapter04 import generate_text_simple
+
+start_context = &quot;Every effort moves you&quot;
+tokenizer = tiktoken.get_encoding(&quot;gpt2&quot;)
+
+token_ids = generate_text_simple(
+    model=model,
+    idx=text_to_token_ids(start_context, tokenizer),
+    max_new_tokens=10,
+    context_size=GPT_CONFIG_124M[&quot;context_length&quot;]
+)
+
+print(&quot;Output text:\n&quot;, token_ids_to_text(token_ids, tokenizer))
+</code></pre>
+<pre><code class="language-python"># Output
+Output text:
+ Every effort moves you rentingノJohnIncvertSw440 Lead GMseek
+</code></pre>
+<p>The model outputs incoherent text because it has not yet undergone training. To define what makes text coherent and to optimize the network weights, we must implement a numerical method to evaluate the generated content. We calculate a loss metric for the generated outputs, which serves as a progress and success indicator during the training phase.</p>
+<h2>Calculating the text generation loss</h2>
+<p>We define two input examples and their corresponding targets to illustrate the loss calculation.</p>
+<pre><code class="language-python">inputs = torch.tensor([
+    [16833, 3626, 6100], # [&quot;every effort moves&quot;,
+    [40, 1107, 588]      #  &quot;I really like&quot;]
+])
+
+targets = torch.tensor([
+    [3626, 6100, 345 ],  # [&quot; effort moves you&quot;,
+    [1107, 588, 11311]   #  &quot; really like chocolate&quot;]
+])
+</code></pre>
+<p>We feed the inputs into the model to calculate the logit vectors for the two input examples, each comprising three tokens. We apply the softmax function to transform these logits into probability scores, and then apply the argmax function to obtain the corresponding predicted token IDs.</p>
+<pre><code class="language-python">with torch.no_grad():
+    logits = model(inputs)
+
+probas = torch.softmax(logits, dim=-1)
+token_ids = torch.argmax(probas, dim=-1, keepdim=True)
+print(&quot;Token IDs:\n&quot;, token_ids)
+</code></pre>
+<pre><code class="language-python"># Output
+Token IDs:
+ tensor([[[16657],
+         [13866],
+         [44376]],
+
+        [[49906],
+         [29669],
+         [ 6972]]])
+</code></pre>
+<p>We convert the predicted token IDs back into text to compare them against the target tokens.</p>
+<pre><code class="language-python">print(f&quot;Targets batch 1: {token_ids_to_text(targets[0], tokenizer)}&quot;)
+print(f&quot;Outputs batch 1: {token_ids_to_text(token_ids[0].flatten(), tokenizer)}&quot;)
+</code></pre>
+<pre><code class="language-python"># Output
+Targets batch 1:  effort moves you
+Outputs batch 1:  Armedbage inaction
+</code></pre>
+<p>The output tokens differ significantly from the target tokens we want the model to generate. We evaluate the performance of the generated text numerically via a loss function. This metric drives the training process by increasing the softmax probability in the index positions corresponding to the correct target token IDs.</p>
+<p>We print the initial softmax probability scores corresponding to the target tokens for each input text.</p>
+<pre><code class="language-python">text_idx = 0
+target_probas_1 = probas[text_idx, [0, 1, 2], targets[text_idx]]
+print(&quot;Text 1:&quot;, target_probas_1)
+
+text_idx = 1
+target_probas_2 = probas[text_idx, [0, 1, 2], targets[text_idx]]
+print(&quot;Text 2:&quot;, target_probas_2)
+</code></pre>
+<pre><code class="language-python"># Output
+Text 1: tensor([7.4541e-05, 3.1295e-05, 1.2549e-05])
+Text 2: tensor([1.0337e-05, 5.4610e-05, 5.2052e-06])
+</code></pre>
+<p>We apply the logarithm to the probability scores. Working with logarithms of probabilities is numerically more stable and manageable in mathematical optimization than handling the raw fractional scores directly.</p>
+<pre><code class="language-python">log_probas = torch.log(torch.cat((target_probas_1, target_probas_2)))
+print(log_probas)
+</code></pre>
+<pre><code class="language-python"># Output
+tensor([ -9.5042, -10.3720, -11.2859, -11.4798,  -9.8153, -12.1658])
+</code></pre>
+<p>We combine these log probabilities into a single score by computing their average. The optimization objective is to push this average log probability as close to 0 as possible by updating the model's weights. In deep learning, standard practice minimizes the negative average log probability, which is the average log probability multiplied by -1.</p>
+<pre><code class="language-python">avg_log_probas = torch.mean(log_probas)
+neg_avg_log_probas = avg_log_probas * -1
+print(neg_avg_log_probas)
+</code></pre>
+<pre><code class="language-python"># Output
+tensor(10.7705)
+</code></pre>
+<p>In deep learning nomenclature, this metric is known as the cross-entropy loss. PyTorch includes a built-in <code>cross_entropy</code> function that computes these sequential steps automatically.</p>
+<div class="blog-image-wrapper">
+            <img class="blog-image" src="../images/blogs/pretraining-on-unlabeled-data-part-1/Pasted image 20260811115159.png" alt="Calculating the loss involves several steps. Steps 1 to 3 calculate the token probabilities corresponding to the target tensors. These probabilities are then transformed via a logarithm and averaged in steps 4 to 6." />
+            <p class="blog-image-caption">Calculating the loss involves several steps. Steps 1 to 3 calculate the token probabilities corresponding to the target tensors. These probabilities are then transformed via a logarithm and averaged in steps 4 to 6.</p>
+          </div>
+
+<p>We verify the shape of the logits and target tensors prior to applying the built-in function.</p>
+<pre><code class="language-python">print(&quot;Logits shape:&quot;, logits.shape)
+print(&quot;Targets shape:&quot;, targets.shape)
+</code></pre>
+<pre><code class="language-python"># Output
+Logits shape: torch.Size([2, 3, 50257])
+Targets shape: torch.Size([2, 3])
+</code></pre>
+<p>The logits tensor has three dimensions: batch size, sequence length, and vocabulary size. The targets tensor has two dimensions: batch size and sequence length. We flatten these tensors over the batch dimension to align with the expected input signature of PyTorch's <code>cross_entropy</code> function.</p>
+<pre><code class="language-python">logits_flat = logits.flatten(0, 1)
+targets_flat = targets.flatten()
+
+print(&quot;Flattened logits:&quot;, logits_flat.shape)
+print(&quot;Flattened targets:&quot;, targets_flat.shape)
+</code></pre>
+<pre><code class="language-python"># Output
+Flattened logits: torch.Size([6, 50257])
+Flattened targets: torch.Size([6])
+</code></pre>
+<p>The <code>targets_flat</code> tensor contains the exact token IDs we want the network to generate, and <code>logits_flat</code> contains the unscaled network outputs. The <code>cross_entropy</code> function handles the softmax application, target selection, logarithmic transformation, and averaging internally.</p>
+<pre><code class="language-python">loss = torch.nn.functional.cross_entropy(logits_flat, targets_flat)
+print(loss)
+</code></pre>
+<pre><code class="language-python"># Output
+tensor(10.7705)
+</code></pre>
+<blockquote>
+<p><strong>Perplexity</strong>
+Perplexity is a measure often used alongside cross-entropy loss to evaluate the performance of language models. It provides an interpretable way to understand the uncertainty of a model in predicting the next token in a sequence. Perplexity measures how well the probability distribution predicted by the model matches the actual distribution of the words in the dataset. Similar to the loss, a lower perplexity indicates that model predictions are closer to the actual distribution.</p>
+<p>Perplexity is calculated mathematically as <code>torch.exp(loss)</code>. It is often considered more interpretable than the raw loss value because it signifies the effective vocabulary size about which the model remains uncertain at each time step.</p>
+</blockquote>
+<h2>Calculating the training and validation set losses</h2>
+<p>We prepare the training and validation datasets to compute the baseline loss. We utilize a small text dataset, "The Verdict", for this demonstration. We divide the dataset into a training split (90 percent) and a validation split (10 percent).</p>
+<pre><code class="language-python">file_path = &quot;the-verdict.txt&quot;
+with open(file_path, &quot;r&quot;, encoding=&quot;utf-8&quot;) as file:
+    text_data = file.read()
+
+train_ratio = 0.90
+split_idx = int(train_ratio * len(text_data))
+train_data = text_data[:split_idx]
+val_data = text_data[split_idx:]
+</code></pre>
+<p>We instantiate the data loaders to construct discrete batches for model evaluation.</p>
+<pre><code class="language-python">from chapter02 import create_dataloader_v1
+
+train_loader = create_dataloader_v1(
+    train_data,
+    batch_size=2,
+    max_length=GPT_CONFIG_124M[&quot;context_length&quot;],
+    stride=GPT_CONFIG_124M[&quot;context_length&quot;],
+    drop_last=True,
+    shuffle=True,
+    num_workers=0
+)
+
+val_loader = create_dataloader_v1(
+    val_data,
+    batch_size=2,
+    max_length=GPT_CONFIG_124M[&quot;context_length&quot;],
+    stride=GPT_CONFIG_124M[&quot;context_length&quot;],
+    drop_last=False,
+    shuffle=False,
+    num_workers=0
+)
+</code></pre>
+<p>We implement a utility function to calculate the cross-entropy loss for a single discrete batch.</p>
+<pre><code class="language-python">def calc_loss_batch(input_batch, target_batch, model, device):
+    input_batch = input_batch.to(device)
+    target_batch = target_batch.to(device)
+    logits = model(input_batch)
+    loss = torch.nn.functional.cross_entropy(
+        logits.flatten(0, 1), target_batch.flatten()
+    )
+    return loss
+</code></pre>
+<p>We use <code>calc_loss_batch</code> to implement the <code>calc_loss_loader</code> function, which computes the average loss across all batches sampled by a given data loader.</p>
+<pre><code class="language-python">def calc_loss_loader(data_loader, model, device, num_batches=None):
+    total_loss = 0.0
+    if len(data_loader) == 0:
+        return float(&quot;nan&quot;)
+    elif num_batches is None:
+        num_batches = len(data_loader)
+    else:
+        num_batches = min(num_batches, len(data_loader))
+
+    for i, (input_batch, target_batch) in enumerate(data_loader):
+        if i &lt; num_batches:
+            loss = calc_loss_batch(
+                input_batch, target_batch, model, device
+            )
+            total_loss += loss.item()
+        else:
+            break
+
+    return total_loss / num_batches
+</code></pre>
+<p>We evaluate this logic by applying the <code>calc_loss_loader</code> function to both the training and validation set loaders.</p>
+<pre><code class="language-python">device = torch.device(&quot;cuda&quot; if torch.cuda.is_available() else &quot;cpu&quot;)
+model.to(device)
+
+with torch.no_grad():
+    train_loss = calc_loss_loader(train_loader, model, device)
+    val_loss = calc_loss_loader(val_loader, model, device)
+
+print(&quot;Training loss:&quot;, train_loss)
+print(&quot;Validation loss:&quot;, val_loss)
+</code></pre>
+<pre><code class="language-python"># Output
+Training loss: 10.98257933722602
+Validation loss: 11.021645545959473
+</code></pre>
+<p>The loss values are relatively high because the network parameters have not yet been updated. The loss metric will approach 0 as the model learns to generate the correct subsequent tokens. We will configure the optimization loop and begin pretraining the model on this dataset in the next section.</p>
+        </article>
+      </main>
+
+    </div>
+
+    <!-- Blog Footer -->
+    <footer class="blog-footer">
+      <div class="footer-divider"></div>
+      <div class="footer-content">
+        <div class="footer-left">
+          <p class="footer-copyright">&copy; 2026 Vishaal S. All rights reserved.</p>
+        </div>
+        <div class="footer-middle">
+          <ul class="footer-links">
+            <li><a href="../index.html">[P] PORTFOLIO</a></li>
+            <li><a href="index.html">[B] BLOG</a></li>
+            <li><a href="https://github.com/Vishaal-sathya" target="_blank">[G] GITHUB</a></li>
+          </ul>
+        </div>
+        <div class="footer-right">
+          <a href="#blog-hero" class="back-to-top-link">[↑] Back to top</a>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Prism Syntax Highlighting -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+  <!-- Script for Markdown source copying -->
+  <script type="text/plain" id="markdown-content">---
+title: "Coding Attention Mechanisms Part 4: Implementing Multi-Head Attention"
+description: "A step-by-step implementation of multi-head attention wrapper and a computationally efficient tensor-parallel multi-head attention module using PyTorch."
+author: "PhD Author"
+date: "2026-07-22"
+---
+
+The term “multi-head” refers to dividing the attention mechanism into multiple “heads,” each operating independently. In this context, a single causal attention module can be considered single-head attention, where there is only one set of attention weights processing the input sequentially.
+
+> **Key Takeaways**
+> - Multi-head attention routes inputs through multiple independent attention layers, each with distinct weight parameters.
+> - Processing heads in parallel requires specific tensor reshaping and transposition to preserve token boundaries in memory.
+> - Transitioning from a sequential module list wrapper to a unified tensor parallel implementation significantly improves computational efficiency.
+
+---
+
+## Stacking multiple single-head attention layers
+
+In practical terms, implementing multi-head attention involves creating multiple instances of the self-attention mechanism, each with its own weights, and then combining their outputs.
+
+![[Pasted image 20260721185453.png]]
+*The multi-head attention module includes two single-head attention modules stacked on top of each other. So, instead of using a single matrix Wv for computing the value matrices, in a multi-head attention module with two heads, we now have two value weight matrices: Wv1 and Wv2. The same applies to the other weight matrices, WQ and Wk. We obtain two sets of context vectors Z1 and Z2 that we can combine into a single context vector matrix Z.*
+
+In code, we can achieve this by implementing a simple `MultiHeadAttentionWrapper` class that stacks multiple instances of our previously implemented `CausalAttention` module. We define all prerequisites, including input tensors and the `CausalAttention` class, to ensure the code block is fully executable:
+
+```python
+import torch
+import torch.nn as nn
+
+inputs = torch.tensor(
+ [[0.43, 0.15, 0.89], # Your (x^1)
+  [0.55, 0.87, 0.66], # journey (x^2)
+  [0.57, 0.85, 0.64], # starts (x^3)
+  [0.22, 0.58, 0.33], # with (x^4)
+  [0.77, 0.25, 0.10], # one (x^5)
+  [0.05, 0.80, 0.55]] # step (x^6)
+)
+batch = torch.stack((inputs, inputs), dim=0)
+
+class CausalAttention(nn.Module):
+    def __init__(self, d_in, d_out, context_length, dropout, qkv_bias=False):
+        super().__init__()
+        self.d_out = d_out
+        self.W_query = nn.Linear(d_in, d_out, bias=qkv_bias)
+        self.W_key = nn.Linear(d_in, d_out, bias=qkv_bias)
+        self.W_value = nn.Linear(d_in, d_out, bias=qkv_bias)
+        self.dropout = nn.Dropout(dropout)
+        self.register_buffer(
+            'mask',
+            torch.triu(torch.ones(context_length, context_length), diagonal=1)
+        )
+
+    def forward(self, x):
+        b, num_tokens, d_in = x.shape
+        keys = self.W_key(x)
+        queries = self.W_query(x)
+        values = self.W_value(x)
+
+        attn_scores = queries @ keys.transpose(1, 2)
+        attn_scores.masked_fill_(self.mask.bool()[:num_tokens, :num_tokens], -torch.inf)
+        attn_weights = torch.softmax(attn_scores / keys.shape[-1]**0.5, dim=-1)
+        attn_weights = self.dropout(attn_weights)
+        context_vec = attn_weights @ values
+
+        return context_vec
+
+class MultiHeadAttentionWrapper(nn.Module):
+    def __init__(self, d_in, d_out, context_length, dropout, num_heads, qkv_bias=False):
+        super().__init__()
+        self.heads = nn.ModuleList(
+            [CausalAttention(d_in, d_out, context_length, dropout, qkv_bias) 
+                for _ in range(num_heads)]
+        )
+
+    def forward(self, x):
+        return torch.cat([head(x) for head in self.heads], dim=-1)
+
+torch.manual_seed(123)
+context_length = batch.shape[1] # This is the number of tokens
+d_in, d_out = 3, 2
+
+mha = MultiHeadAttentionWrapper(
+ d_in, d_out, context_length, 0.0, num_heads=2
+)
+context_vecs = mha(batch)
+print(context_vecs)
+```
+```python
+# Output
+tensor([[[-0.4519,  0.2216,  0.4772,  0.1063],
+         [-0.5874,  0.0058,  0.5891,  0.3257],
+         [-0.6300, -0.0632,  0.6202,  0.3860],
+         [-0.5675, -0.0843,  0.5478,  0.3589],
+         [-0.5526, -0.0981,  0.5321,  0.3428],
+         [-0.5299, -0.1081,  0.5077,  0.3493]],
+
+        [[-0.4519,  0.2216,  0.4772,  0.1063],
+         [-0.5874,  0.0058,  0.5891,  0.3257],
+         [-0.6300, -0.0632,  0.6202,  0.3860],
+         [-0.5675, -0.0843,  0.5478,  0.3589],
+         [-0.5526, -0.0981,  0.5321,  0.3428],
+         [-0.5299, -0.1081,  0.5077,  0.3493]]], grad_fn=<CatBackward0>)
+```
+
+Up to this point, we have implemented a `MultiHeadAttentionWrapper` that combined multiple single-head attention modules. However, these are processed sequentially via list comprehension inside the forward method.
+
+In contrast, the following `MultiHeadAttention` class integrates the multi-head functionality within a single class. It splits the input into multiple heads by reshaping the projected query, key, and value tensors, and then combines the results from these heads after computing attention.
+
+---
+
+## Implementing the Efficient MultiHeadAttention Class
+
+```python
+import torch
+import torch.nn as nn
+
+class MultiHeadAttention(nn.Module):
+    def __init__(self, d_in, d_out, context_length, dropout, num_heads, qkv_bias=False):
+        super().__init__()
+        assert (d_out % num_heads == 0), "d_out must be divisible by num_heads"
+
+        self.d_out = d_out
+        self.num_heads = num_heads
+        self.head_dim = d_out // num_heads
+        self.W_query = nn.Linear(d_in, d_out, bias=qkv_bias)
+        self.W_key = nn.Linear(d_in, d_out, bias=qkv_bias)
+        self.W_value = nn.Linear(d_in, d_out, bias=qkv_bias)
+        self.dropout = nn.Dropout(dropout)
+        self.out_proj = nn.Linear(d_out, d_out)
+        self.register_buffer('mask', torch.triu(torch.ones(context_length, context_length), diagonal=1))
+
+    def forward(self, x):
+        b, num_tokens, d_in = x.shape
+        keys = self.W_key(x)
+        queries = self.W_query(x)
+        values = self.W_value(x)
+
+        keys = keys.view(b, num_tokens, self.num_heads, self.head_dim)
+        queries = queries.view(b, num_tokens, self.num_heads, self.head_dim)
+        values = values.view(b, num_tokens, self.num_heads, self.head_dim)
+
+        keys = keys.transpose(1, 2)
+        queries = queries.transpose(1, 2)
+        values = values.transpose(1, 2)
+
+        attn_scores = queries @ keys.transpose(2, 3)
+        mask_bool = self.mask.bool()[:num_tokens, :num_tokens]
+        attn_scores.masked_fill_(mask_bool, -torch.inf)
+        attn_weights = torch.softmax(attn_scores / keys.shape[-1]**0.5, dim=-1)
+        attn_weights = self.dropout(attn_weights)
+
+        context_vec = (attn_weights @ values).transpose(1, 2)
+        context_vec = context_vec.contiguous().view(b, num_tokens, self.d_out)
+        context_vec = self.out_proj(context_vec)
+
+        return context_vec
+```
+
+---
+
+## Tensor Reshaping and Memory Layout
+
+What we are trying to do is to create weight parameters of size num_tokens x head_dim for each head. So if we have two heads, we will have two W_key operations of size num_tokens x head_dim for each batch.
+
+Initially we have a single weight matrix of dimension batch x num_tokens x d_out and we convert it to batch x num_heads x num_tokens x head_dim, but if you notice we are not directly reshaping it to the final dimensions. We first reshape it to batch x num_tokens x num_heads x head_dim and then we transpose the second and third dimensions to get the result.
+
+The reason is because the matrix is arranged in memory as follows:
+
+```
+Batch0
+
+Token1
+[embeddings]
+
+Token2
+[embeddings]
+
+Token3
+[embeddings]
+
+Token4
+[embeddings]
+```
+
+So we now split every token embedding across the number of heads we want:
+
+```
+Batch0
+
+Token1
+[head1_embeddings, head2_embeddings, head3_embeddings]
+
+Token2
+[head1_embeddings, head2_embeddings, head3_embeddings]
+
+Token3
+[head1_embeddings, head2_embeddings, head3_embeddings]
+
+Token4
+[head1_embeddings, head2_embeddings, head3_embeddings]
+```
+
+If we tried to reshape it directly to batch x num_heads x num_tokens x head_dim, PyTorch would interpret the matrix as:
+
+```
+Batch
+
+Head0
+
+Token1
+Token2
+...
+
+Head1
+...
+```
+
+But the memory is **not arranged that way**.
+
+The first set of numbers belongs completely to token 1, not to head 1 across all tokens. So the heads would become garbage mixtures of different tokens.
+
+---
+
+## Merging Attention Heads and Output Projection
+
+The final phase of the `MultiHeadAttention` forward pass merges the independent attention heads back into a single unified context tensor for each token. Initially, batched matrix multiplication computes context vectors for each head, resulting in a tensor of dimension `(batch, heads, tokens, head_dim)` (for example, `(2, 12, 4, 64)`). To group the outputs of different heads by token, we transpose the tensor dimensions to `(batch, tokens, heads, head_dim)` (yielding `(2, 4, 12, 64)`). Because this transposition only alters the logical layout indexing (strides) without copying data, we call `.contiguous()` to physically rearrange the data in memory. This contiguity is required before utilizing `.view()`, which flattens the last two dimensions to concatenate the heads into a unified embedding dimension of size `self.d_out` ($12 \times 64 = 768$), producing a shape of `(batch, tokens, d_out)` (yielding `(2, 4, 768)`).
+
+For a single token, this flattening and concatenation process modifies the memory layout as follows:
+
+```text
+Before view() [Independent Attention Heads]:
+Head 1:   [64 values]
+Head 2:   [64 values]
+...
+Head 12:  [64 values]
+
+After view() [Concatenated Context Vector]:
+[ Head 1 (64) | Head 2 (64) | ... | Head 12 (64) ]  --->  768 dimensions
+```
+
+Once the heads are concatenated, the combined representation is passed through a linear projection layer `self.out_proj` of shape `(d_out, d_out)` (representing `nn.Linear(768, 768)`). This projection layer is critical because a direct concatenation simply groups the independent attention outputs adjacent to one another without interaction. The projection adds learnable weights to this step so if for example head one learns grammar, head 2 learns long-range dependencies etc, the projection matrix can learn things like 40% of head 1 + 20% of head 2...
+
+---
+
+## Verifying the Multi-Head Attention Output
+
+The `MultiHeadAttention` class can be used similarly to the `SelfAttention` and `CausalAttention` classes we implemented earlier:
+
+```python
+# Assuming 'inputs' and 'batch' are defined as before:
+torch.manual_seed(123)
+batch_size, context_length, d_in = batch.shape
+d_out = 2
+mha = MultiHeadAttention(d_in, d_out, context_length, 0.0, num_heads=2)
+context_vecs = mha(batch)
+print(context_vecs)
+print("context_vecs.shape:", context_vecs.shape)
+```
+```python
+# Output
+tensor([[[0.3190, 0.4858],
+         [0.2943, 0.3897],
+         [0.2856, 0.3593],
+         [0.2693, 0.3873],
+         [0.2639, 0.3928],
+         [0.2575, 0.4028]],
+
+        [[0.3190, 0.4858],
+         [0.2943, 0.3897],
+         [0.2856, 0.3593],
+         [0.2693, 0.3873],
+         [0.2639, 0.3928],
+         [0.2575, 0.4028]]], grad_fn=<ViewBackward0>)
+context_vecs.shape: torch.Size([2, 6, 2])
+```
+
+We have now implemented the `MultiHeadAttention` class that we will use when we implement and train the LLM. Note that while the code is fully functional, we used relatively small embedding sizes and numbers of attention heads to keep the outputs readable.
+
+For comparison, the smallest GPT-2 model (117 million parameters) has 12 attention heads and a context vector embedding size of 768. The largest GPT-2 model (1.5 billion parameters) has 25 attention heads and a context vector embedding size of 1,600. The embedding sizes of the token inputs and context embeddings are the same in GPT models (d_in = d_out).</script>
+
+  <!-- JS for Sticky Title Scroll, Theme Toggle, & Copy Markdown -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const hero = document.getElementById("blog-hero");
+      const sidebar = document.querySelector(".sidebar-col");
+
+      if (hero && sidebar) {
+        const checkScroll = () => {
+          const heroBottom = hero.getBoundingClientRect().bottom;
+          if (heroBottom <= 0) {
+            sidebar.classList.add("has-scrolled");
+          } else {
+            sidebar.classList.remove("has-scrolled");
+          }
+        };
+
+        window.addEventListener("scroll", checkScroll);
+        window.addEventListener("resize", checkScroll);
+        checkScroll();
+      }
+
+      // Copy markdown functionality using script tag content
+      const copyBtn = document.getElementById("copy-markdown-btn");
+      if (copyBtn) {
+        copyBtn.addEventListener("click", () => {
+          const markdownText = document.getElementById("markdown-content").textContent.trim();
+          navigator.clipboard.writeText(markdownText).then(() => {
+            const originalText = copyBtn.textContent;
+            copyBtn.textContent = "Copied!";
+            copyBtn.style.borderColor = "var(--color-1)";
+            copyBtn.style.color = "var(--color-1)";
+            setTimeout(() => {
+              copyBtn.textContent = originalText;
+              copyBtn.style.borderColor = "";
+              copyBtn.style.color = "";
+            }, 2000);
+          }).catch(err => {
+            console.error('Failed to copy markdown: ', err);
+            alert("Could not copy markdown to clipboard automatically.");
+          });
+        });
+      }
+
+      // Light/Dark Theme Toggle Logic
+      const themeToggle = document.getElementById("theme-toggle");
+      if (themeToggle) {
+        const currentTheme = localStorage.getItem("theme") || "light";
+
+        if (currentTheme === "dark") {
+          updateThemeIcon(themeToggle, "dark");
+        }
+
+        themeToggle.addEventListener("click", function (e) {
+          e.preventDefault();
+          document.body.classList.toggle("dark-mode");
+          const theme = document.body.classList.contains("dark-mode") ? "dark" : "light";
+          localStorage.setItem("theme", theme);
+          updateThemeIcon(themeToggle, theme);
+        });
+      }
+
+      function updateThemeIcon(btn, theme) {
+        const svg = btn.querySelector(".theme-toggle-icon");
+        if (!svg) return;
+        if (theme === "dark") {
+          svg.innerHTML = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`;
+        } else {
+          svg.innerHTML = `
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          `;
+        }
+      }
+    });
+  </script>
+</body>
+
+</html>

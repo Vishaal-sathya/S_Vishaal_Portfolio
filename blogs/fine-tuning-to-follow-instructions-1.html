@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fine-Tuning to Follow Instructions Part 1: Dataset Formatting and Collation - Vishaal S Blog</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Castoro:ital@0;1&family=Public+Sans:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
+
+  <!-- Prism.js for Syntax Highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
+
+  <!-- MathJax for TeX Formula Rendering -->
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+  <!-- Unified Article Stylesheet -->
+  <link rel="stylesheet" href="../css/blog-article.css" />
+</head>
+
+<body>
+  <script>
+    if (localStorage.getItem("theme") === "dark") {
+      document.body.classList.add("dark-mode");
+    }
+  </script>
+
+  <div class="container">
+
+    <!-- Top Navigation -->
+    <nav class="blog-nav">
+      <a class="nav-logo" href="../index.html">Build an LLM from Scratch #6</a>
+      <ul class="nav-links">
+        <li><a href="../index.html">[P] PORTFOLIO</a></li>
+        <li><a href="index.html">[B] BLOG</a></li>
+        <li><a href="https://github.com/Vishaal-sathya" target="_blank">[G] GITHUB</a></li>
+        <!-- Theme Toggle -->
+        <li>
+          <a href="#0" id="theme-toggle" class="theme-toggle-btn"
+            style="display: inline-flex; align-items: center; justify-content: center; padding: 0.6rem;"
+            aria-label="Toggle Theme">
+            <svg class="theme-toggle-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Giant Hero Title -->
+    <header id="blog-hero">
+      <h1>Fine-Tuning to Follow Instructions Part 1: Dataset Formatting and Collation</h1>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="blog-layout">
+
+      <!-- Left Sticky Sidebar -->
+      <aside class="sidebar-col">
+
+        <!-- Sticky Collapsible Title -->
+        <h2 class="sidebar-title">
+          Fine-Tuning to Follow Instructions Part 1: Dataset Formatting and Collation
+        </h2>
+
+        <!-- Metadata Table -->
+        <div class="metadata-section">
+          <h3 class="metadata-section-label">/ Metadata</h3>
+          <div class="metadata-table">
+            <div class="metadata-row">
+              <span class="metadata-label">Date:</span>
+              <span class="metadata-value">2026.08.24</span>
+            </div>
+            <div class="metadata-row">
+              <span class="metadata-label">Author:</span>
+              <span class="metadata-value-box">Vishaal S</span>
+            </div>
+            <div class="metadata-row">
+              <span class="metadata-label">Reading Time:</span>
+              <span class="metadata-value">8 Min Read</span>
+            </div>
+            <div class="metadata-row">
+              <span class="metadata-label">Categories:</span>
+              <div>
+                <span class="metadata-value-box">LLMs</span>
+                <span class="metadata-value-box">Self-Attention</span>
+                <span class="metadata-value-box">PyTorch</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Utility Actions -->
+        <div class="sidebar-actions">
+          <div class="action-btn-row">
+            <button class="action-btn" id="copy-markdown-btn">
+              Copy Markdown
+            </button>
+          </div>
+          <div class="action-btn-row">
+            <a href="https://twitter.com/share" class="action-btn" target="_blank">
+              Twitter/X
+            </a>
+            <a href="https://linkedin.com/share" class="action-btn" target="_blank">
+              LinkedIn
+            </a>
+          </div>
+        </div>
+
+      </aside>
+
+      <!-- Right Content Column -->
+      <main class="content-col">
+        <h3 class="content-section-label">/ Article</h3>
+
+        <article class="article-body">
+<p>Previously, we implemented the large language model architecture, carried out pretraining, and imported pretrained weights. We then focused on fine-tuning the model for a specific discriminative task by distinguishing between spam and non-spam text messages. We now implement the process for fine-tuning a model to follow explicit human instructions.</p>
+<div class="takeaways-box">
+            <h4>Key Takeaways</h4>
+            <ul>
+<li>Instruction fine-tuning utilizes structured prompt templates to condition the model on explicit generative tasks rather than predefined categorical labels.</li>
+<li>Custom collate functions dynamically pad variable-length sequences to the maximum length within a specific batch, optimizing memory usage compared to global dataset padding.</li>
+<li>Replacing padding token IDs with a specific ignore index (e.g., -100) in the target tensor ensures they do not contribute to the cross-entropy loss computation.</li>
+            </ul>
+          </div>
+<div class="blog-image-wrapper">
+            <img class="blog-image" src="../images/blogs/fine-tuning-to-follow-instructions-1/Pasted image 20260821111737.png" alt="Examples of instructions that are processed by a large language model to generate desired responses." />
+            <p class="blog-image-caption">Examples of instructions that are processed by a large language model to generate desired responses.</p>
+          </div>
+
+<h2>Preparing a dataset for supervised instruction fine-tuning</h2>
+<p>We acquire and format the instruction dataset required for fine-tuning a pretrained model. We retrieve the dataset using a programmatic download function.</p>
+<pre><code class="language-python">import json
+import os
+import urllib.request
+
+def download_and_load_file(file_path, url):
+    if not os.path.exists(file_path):
+        with urllib.request.urlopen(url) as response:
+            text_data = response.read().decode(&quot;utf-8&quot;)
+        with open(file_path, &quot;w&quot;, encoding=&quot;utf-8&quot;) as file:
+            file.write(text_data)
+    else:
+        with open(file_path, &quot;r&quot;, encoding=&quot;utf-8&quot;) as file:
+            text_data = file.read()
+
+    with open(file_path, &quot;r&quot;) as file:
+        data = json.load(file)
+    return data
+
+file_path = &quot;instruction-data.json&quot;
+url = (
+    &quot;https://raw.githubusercontent.com/rasbt/LLMs-from-scratch&quot;
+    &quot;/main/ch07/01_main-chapter-code/instruction-data.json&quot;
+)
+data = download_and_load_file(file_path, url)
+print(&quot;Number of entries:&quot;, len(data))
+</code></pre>
+<pre><code class="language-python"># Output
+Number of entries: 1100
+</code></pre>
+<p>We inspect a single entry to observe the underlying data structure.</p>
+<pre><code class="language-python">print(&quot;Example entry:\n&quot;, data[50])
+</code></pre>
+<pre><code class="language-python"># Output
+Example entry:
+ {'instruction': 'Identify the correct spelling of the following word.',
+ 'input': 'Ocassion', 'output': &quot;The correct spelling is 'Occasion.'&quot;}
+</code></pre>
+<p>Instruction fine-tuning involves training a model on a dataset where explicit input-target pairs are provided. Various structural conventions exist to format these entries for model ingestion.</p>
+<div class="blog-image-wrapper">
+            <img class="blog-image" src="../images/blogs/fine-tuning-to-follow-instructions-1/Pasted image 20260821112432.png" alt="Comparison of prompt styles for instruction fine-tuning in language models. The Alpaca style (left) uses a structured format with defined sections for instruction, input, and response, while the Phi-3 style (right) employs a simpler format with designated `<|user|>` and `<|assistant|>` tokens." />
+            <p class="blog-image-caption">Comparison of prompt styles for instruction fine-tuning in language models. The Alpaca style (left) uses a structured format with defined sections for instruction, input, and response, while the Phi-3 style (right) employs a simpler format with designated `<|user|>` and `<|assistant|>` tokens.</p>
+          </div>
+
+<p>We define a <code>format_input</code> function to convert the entries from the raw dictionary into the structured Alpaca-style input format.</p>
+<pre><code class="language-python">def format_input(entry):
+    instruction_text = (
+        f&quot;Below is an instruction that describes a task. &quot;
+        f&quot;Write a response that appropriately completes the request.&quot;
+        f&quot;\n\n### Instruction:\n{entry['instruction']}&quot;
+    )
+
+    input_text = (
+        f&quot;\n\n### Input:\n{entry['input']}&quot; if entry[&quot;input&quot;] else &quot;&quot;
+    )
+    return instruction_text + input_text
+</code></pre>
+<p>Prior to establishing the PyTorch data loaders, we partition the dataset into training, validation, and test subsets.</p>
+<pre><code class="language-python">train_portion = int(len(data) * 0.85)
+test_portion = int(len(data) * 0.1)
+val_portion = len(data) - train_portion - test_portion
+
+train_data = data[:train_portion]
+test_data = data[train_portion:train_portion + test_portion]
+val_data = data[train_portion + test_portion:]
+
+print(&quot;Training set length:&quot;, len(train_data))
+print(&quot;Validation set length:&quot;, len(val_data))
+print(&quot;Test set length:&quot;, len(test_data))
+</code></pre>
+<pre><code class="language-python"># Output
+Training set length: 935
+Validation set length: 55
+Test set length: 110
+</code></pre>
+<h2>Organizing data into training batches</h2>
+<p>The batching process for instruction data requires sequential processing steps to handle variable sequence lengths.</p>
+<div class="blog-image-wrapper">
+            <img class="blog-image" src="../images/blogs/fine-tuning-to-follow-instructions-1/Pasted image 20260821113025.png" alt="The five substeps involved in implementing the batching process. (2.1) Applying the prompt template. (2.2) Using tokenization. (2.3) Adding padding tokens. (2.4) Creating target token IDs. (2.5) Replacing -100 placeholder tokens to mask padding tokens in the loss function." />
+            <p class="blog-image-caption">The five substeps involved in implementing the batching process. (2.1) Applying the prompt template. (2.2) Using tokenization. (2.3) Adding padding tokens. (2.4) Creating target token IDs. (2.5) Replacing -100 placeholder tokens to mask padding tokens in the loss function.</p>
+          </div>
+
+<p>We define a custom PyTorch <code>Dataset</code> class to encode the full text sequences containing the instructions, inputs, and desired responses.</p>
+<pre><code class="language-python">import torch
+from torch.utils.data import Dataset
+
+class InstructionDataset(Dataset):
+    def __init__(self, data, tokenizer):
+        self.data = data
+        self.encoded_texts = []
+
+        for entry in data:
+            instruction_plus_input = format_input(entry)
+            response_text = f&quot;\n\n### Response:\n{entry['output']}&quot;
+            full_text = instruction_plus_input + response_text
+            self.encoded_texts.append(
+                tokenizer.encode(full_text)
+            )
+
+    def __getitem__(self, index):
+        return self.encoded_texts[index]
+
+    def __len__(self):
+        return len(self.data)
+</code></pre>
+<p>We develop a custom collate function which pads the training examples in each batch to a uniform length. This specific approach minimizes unnecessary computational overhead by extending sequences only to match the longest element within the current batch, rather than padding against the entire dataset maximum.</p>
+<pre><code class="language-python">def custom_collate_draft_1(batch, pad_token_id=50256, device=&quot;cpu&quot;):
+    batch_max_length = max(len(item)+1 for item in batch)
+    inputs_lst = []
+
+    for item in batch:
+        new_item = item.copy()
+        new_item += [pad_token_id]
+        padded = (
+            new_item + [pad_token_id] *
+            (batch_max_length - len(new_item))
+        )
+        inputs = torch.tensor(padded[:-1])
+        inputs_lst.append(inputs)
+
+    inputs_tensor = torch.stack(inputs_lst).to(device)
+    return inputs_tensor
+</code></pre>
+<p>We must structure the batches with the target token IDs corresponding to the input token IDs. The target token IDs match the input token IDs but are shifted precisely one position to the right to facilitate causal language modeling.</p>
+<pre><code class="language-python">def custom_collate_draft_2(batch, pad_token_id=50256, device=&quot;cpu&quot;):
+    batch_max_length = max(len(item)+1 for item in batch)
+    inputs_lst, targets_lst = [], []
+
+    for item in batch:
+        new_item = item.copy()
+        new_item += [pad_token_id]
+        padded = (
+            new_item + [pad_token_id] *
+            (batch_max_length - len(new_item))
+        )
+        inputs = torch.tensor(padded[:-1])
+        targets = torch.tensor(padded[1:])
+        inputs_lst.append(inputs)
+        targets_lst.append(targets)
+
+    inputs_tensor = torch.stack(inputs_lst).to(device)
+    targets_tensor = torch.stack(targets_lst).to(device)
+    return inputs_tensor, targets_tensor
+
+inputs_1 = [0, 1, 2, 3, 4]
+inputs_2 = [5, 6]
+inputs_3 = [7, 8, 9]
+batch = (inputs_1, inputs_2, inputs_3)
+
+inputs, targets = custom_collate_draft_2(batch)
+print(&quot;Inputs:\n&quot;, inputs)
+print(&quot;Targets:\n&quot;, targets)
+</code></pre>
+<pre><code class="language-python"># Output
+Inputs:
+ tensor([[    0,     1,     2,     3,     4],
+        [    5,     6, 50256, 50256, 50256],
+        [    7,     8,     9, 50256, 50256]])
+Targets:
+ tensor([[    1,     2,     3,     4, 50256],
+        [    6, 50256, 50256, 50256, 50256],
+        [    8,     9, 50256, 50256, 50256]])
+</code></pre>
+<p>We assign a <code>-100</code> placeholder value to all padding tokens within the target tensors. This special value dictates that these tokens are excluded from the training loss calculation. We retain exactly one end-of-text token (ID <code>50256</code>) in the target list to ensure the model learns to generate termination tokens.</p>
+<p>We implement the final <code>custom_collate_fn</code> containing the masking logic.</p>
+<pre><code class="language-python">def custom_collate_fn(
+    batch, pad_token_id=50256, ignore_index=-100, allowed_max_length=1024, device=&quot;cpu&quot;
+):
+    batch_max_length = max(len(item)+1 for item in batch)
+    inputs_lst, targets_lst = [], []
+
+    for item in batch:
+        new_item = item.copy()
+        new_item += [pad_token_id]
+        padded = (
+            new_item + [pad_token_id] *
+            (batch_max_length - len(new_item))
+        )
+
+        inputs = torch.tensor(padded[:-1])
+        targets = torch.tensor(padded[1:])
+        mask = targets == pad_token_id
+        indices = torch.nonzero(mask).squeeze()
+
+        if indices.numel() &gt; 1:
+            targets[indices[1:]] = ignore_index
+
+        if allowed_max_length is not None:
+            inputs = inputs[:allowed_max_length]
+            targets = targets[:allowed_max_length]
+
+        inputs_lst.append(inputs)
+        targets_lst.append(targets)
+
+    inputs_tensor = torch.stack(inputs_lst).to(device)
+    targets_tensor = torch.stack(targets_lst).to(device)
+    return inputs_tensor, targets_tensor
+
+inputs, targets = custom_collate_fn(batch)
+print(&quot;Inputs:\n&quot;, inputs)
+print(&quot;Targets:\n&quot;, targets)
+</code></pre>
+<pre><code class="language-python"># Output
+Inputs:
+ tensor([[    0,     1,     2,     3,     4],
+        [    5,     6, 50256, 50256, 50256],
+        [    7,     8,     9, 50256, 50256]])
+Targets:
+ tensor([[    1,     2,     3,     4, 50256],
+        [    6, 50256,  -100,  -100,  -100],
+        [    8,     9, 50256,  -100,  -100]])
+</code></pre>
+<p>The underlying mathematical logic behind replacing target tokens with <code>-100</code> relates directly to the cross-entropy function. We demonstrate this using a simplified synthetic example computing the loss when the model predicts a sequence.</p>
+<pre><code class="language-python">logits_1 = torch.tensor([
+    [-1.0, 1.0],
+    [-0.5, 1.5]
+])
+targets_1 = torch.tensor([0, 1]) 
+loss_1 = torch.nn.functional.cross_entropy(logits_1, targets_1)
+print(loss_1)
+</code></pre>
+<pre><code class="language-python"># Output
+tensor(1.1269)
+</code></pre>
+<p>If we evaluate a sequence containing an arbitrary third token, the loss shifts.</p>
+<pre><code class="language-python">logits_2 = torch.tensor([
+    [-1.0, 1.0],
+    [-0.5, 1.5],
+    [-0.5, 1.5]
+])
+targets_2 = torch.tensor([0, 1, 1])
+loss_2 = torch.nn.functional.cross_entropy(logits_2, targets_2)
+print(loss_2)
+</code></pre>
+<pre><code class="language-python"># Output
+tensor(0.7936)
+</code></pre>
+<p>If we replace the third target token ID with the ignore index (<code>-100</code>), the function excludes that index entirely.</p>
+<pre><code class="language-python">targets_3 = torch.tensor([0, 1, -100])
+loss_3 = torch.nn.functional.cross_entropy(logits_2, targets_3)
+print(loss_3)
+print(&quot;loss_1 == loss_3:&quot;, loss_1 == loss_3)
+</code></pre>
+<pre><code class="language-python"># Output
+tensor(1.1269)
+loss_1 == loss_3: tensor(True)
+</code></pre>
+<p>The resulting loss precisely matches the initial two-element sequence. The default behavior of the PyTorch function is <code>cross_entropy(..., ignore_index=-100)</code>. We leverage this parameter to exclude arbitrary padding tokens inserted to equalize batch dimensions.</p>
+<div class="takeaways-box">
+            <h4>IMPORTANT</h4>
+            <p>In addition to masking out padding tokens, it is standard practice to mask out the target token IDs corresponding to the prompt instruction itself. By masking the instruction segments, the cross-entropy loss is computed exclusively for the generated response target IDs. The model optimizes strictly for generating accurate responses rather than dedicating capacity to memorizing the static prompt templates.</p>
+          </div>
+        </article>
+      </main>
+
+    </div>
+
+    <!-- Blog Footer -->
+    <footer class="blog-footer">
+      <div class="footer-divider"></div>
+      <div class="footer-content">
+        <div class="footer-left">
+          <p class="footer-copyright">&copy; 2026 Vishaal S. All rights reserved.</p>
+        </div>
+        <div class="footer-middle">
+          <ul class="footer-links">
+            <li><a href="../index.html">[P] PORTFOLIO</a></li>
+            <li><a href="index.html">[B] BLOG</a></li>
+            <li><a href="https://github.com/Vishaal-sathya" target="_blank">[G] GITHUB</a></li>
+          </ul>
+        </div>
+        <div class="footer-right">
+          <a href="#blog-hero" class="back-to-top-link">[↑] Back to top</a>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Prism Syntax Highlighting -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+  <!-- Script for Markdown source copying -->
+  <script type="text/plain" id="markdown-content">---
+title: "Coding Attention Mechanisms Part 4: Implementing Multi-Head Attention"
+description: "A step-by-step implementation of multi-head attention wrapper and a computationally efficient tensor-parallel multi-head attention module using PyTorch."
+author: "PhD Author"
+date: "2026-07-22"
+---
+
+The term “multi-head” refers to dividing the attention mechanism into multiple “heads,” each operating independently. In this context, a single causal attention module can be considered single-head attention, where there is only one set of attention weights processing the input sequentially.
+
+> **Key Takeaways**
+> - Multi-head attention routes inputs through multiple independent attention layers, each with distinct weight parameters.
+> - Processing heads in parallel requires specific tensor reshaping and transposition to preserve token boundaries in memory.
+> - Transitioning from a sequential module list wrapper to a unified tensor parallel implementation significantly improves computational efficiency.
+
+---
+
+## Stacking multiple single-head attention layers
+
+In practical terms, implementing multi-head attention involves creating multiple instances of the self-attention mechanism, each with its own weights, and then combining their outputs.
+
+![[Pasted image 20260721185453.png]]
+*The multi-head attention module includes two single-head attention modules stacked on top of each other. So, instead of using a single matrix Wv for computing the value matrices, in a multi-head attention module with two heads, we now have two value weight matrices: Wv1 and Wv2. The same applies to the other weight matrices, WQ and Wk. We obtain two sets of context vectors Z1 and Z2 that we can combine into a single context vector matrix Z.*
+
+In code, we can achieve this by implementing a simple `MultiHeadAttentionWrapper` class that stacks multiple instances of our previously implemented `CausalAttention` module. We define all prerequisites, including input tensors and the `CausalAttention` class, to ensure the code block is fully executable:
+
+```python
+import torch
+import torch.nn as nn
+
+inputs = torch.tensor(
+ [[0.43, 0.15, 0.89], # Your (x^1)
+  [0.55, 0.87, 0.66], # journey (x^2)
+  [0.57, 0.85, 0.64], # starts (x^3)
+  [0.22, 0.58, 0.33], # with (x^4)
+  [0.77, 0.25, 0.10], # one (x^5)
+  [0.05, 0.80, 0.55]] # step (x^6)
+)
+batch = torch.stack((inputs, inputs), dim=0)
+
+class CausalAttention(nn.Module):
+    def __init__(self, d_in, d_out, context_length, dropout, qkv_bias=False):
+        super().__init__()
+        self.d_out = d_out
+        self.W_query = nn.Linear(d_in, d_out, bias=qkv_bias)
+        self.W_key = nn.Linear(d_in, d_out, bias=qkv_bias)
+        self.W_value = nn.Linear(d_in, d_out, bias=qkv_bias)
+        self.dropout = nn.Dropout(dropout)
+        self.register_buffer(
+            'mask',
+            torch.triu(torch.ones(context_length, context_length), diagonal=1)
+        )
+
+    def forward(self, x):
+        b, num_tokens, d_in = x.shape
+        keys = self.W_key(x)
+        queries = self.W_query(x)
+        values = self.W_value(x)
+
+        attn_scores = queries @ keys.transpose(1, 2)
+        attn_scores.masked_fill_(self.mask.bool()[:num_tokens, :num_tokens], -torch.inf)
+        attn_weights = torch.softmax(attn_scores / keys.shape[-1]**0.5, dim=-1)
+        attn_weights = self.dropout(attn_weights)
+        context_vec = attn_weights @ values
+
+        return context_vec
+
+class MultiHeadAttentionWrapper(nn.Module):
+    def __init__(self, d_in, d_out, context_length, dropout, num_heads, qkv_bias=False):
+        super().__init__()
+        self.heads = nn.ModuleList(
+            [CausalAttention(d_in, d_out, context_length, dropout, qkv_bias) 
+                for _ in range(num_heads)]
+        )
+
+    def forward(self, x):
+        return torch.cat([head(x) for head in self.heads], dim=-1)
+
+torch.manual_seed(123)
+context_length = batch.shape[1] # This is the number of tokens
+d_in, d_out = 3, 2
+
+mha = MultiHeadAttentionWrapper(
+ d_in, d_out, context_length, 0.0, num_heads=2
+)
+context_vecs = mha(batch)
+print(context_vecs)
+```
+```python
+# Output
+tensor([[[-0.4519,  0.2216,  0.4772,  0.1063],
+         [-0.5874,  0.0058,  0.5891,  0.3257],
+         [-0.6300, -0.0632,  0.6202,  0.3860],
+         [-0.5675, -0.0843,  0.5478,  0.3589],
+         [-0.5526, -0.0981,  0.5321,  0.3428],
+         [-0.5299, -0.1081,  0.5077,  0.3493]],
+
+        [[-0.4519,  0.2216,  0.4772,  0.1063],
+         [-0.5874,  0.0058,  0.5891,  0.3257],
+         [-0.6300, -0.0632,  0.6202,  0.3860],
+         [-0.5675, -0.0843,  0.5478,  0.3589],
+         [-0.5526, -0.0981,  0.5321,  0.3428],
+         [-0.5299, -0.1081,  0.5077,  0.3493]]], grad_fn=<CatBackward0>)
+```
+
+Up to this point, we have implemented a `MultiHeadAttentionWrapper` that combined multiple single-head attention modules. However, these are processed sequentially via list comprehension inside the forward method.
+
+In contrast, the following `MultiHeadAttention` class integrates the multi-head functionality within a single class. It splits the input into multiple heads by reshaping the projected query, key, and value tensors, and then combines the results from these heads after computing attention.
+
+---
+
+## Implementing the Efficient MultiHeadAttention Class
+
+```python
+import torch
+import torch.nn as nn
+
+class MultiHeadAttention(nn.Module):
+    def __init__(self, d_in, d_out, context_length, dropout, num_heads, qkv_bias=False):
+        super().__init__()
+        assert (d_out % num_heads == 0), "d_out must be divisible by num_heads"
+
+        self.d_out = d_out
+        self.num_heads = num_heads
+        self.head_dim = d_out // num_heads
+        self.W_query = nn.Linear(d_in, d_out, bias=qkv_bias)
+        self.W_key = nn.Linear(d_in, d_out, bias=qkv_bias)
+        self.W_value = nn.Linear(d_in, d_out, bias=qkv_bias)
+        self.dropout = nn.Dropout(dropout)
+        self.out_proj = nn.Linear(d_out, d_out)
+        self.register_buffer('mask', torch.triu(torch.ones(context_length, context_length), diagonal=1))
+
+    def forward(self, x):
+        b, num_tokens, d_in = x.shape
+        keys = self.W_key(x)
+        queries = self.W_query(x)
+        values = self.W_value(x)
+
+        keys = keys.view(b, num_tokens, self.num_heads, self.head_dim)
+        queries = queries.view(b, num_tokens, self.num_heads, self.head_dim)
+        values = values.view(b, num_tokens, self.num_heads, self.head_dim)
+
+        keys = keys.transpose(1, 2)
+        queries = queries.transpose(1, 2)
+        values = values.transpose(1, 2)
+
+        attn_scores = queries @ keys.transpose(2, 3)
+        mask_bool = self.mask.bool()[:num_tokens, :num_tokens]
+        attn_scores.masked_fill_(mask_bool, -torch.inf)
+        attn_weights = torch.softmax(attn_scores / keys.shape[-1]**0.5, dim=-1)
+        attn_weights = self.dropout(attn_weights)
+
+        context_vec = (attn_weights @ values).transpose(1, 2)
+        context_vec = context_vec.contiguous().view(b, num_tokens, self.d_out)
+        context_vec = self.out_proj(context_vec)
+
+        return context_vec
+```
+
+---
+
+## Tensor Reshaping and Memory Layout
+
+What we are trying to do is to create weight parameters of size num_tokens x head_dim for each head. So if we have two heads, we will have two W_key operations of size num_tokens x head_dim for each batch.
+
+Initially we have a single weight matrix of dimension batch x num_tokens x d_out and we convert it to batch x num_heads x num_tokens x head_dim, but if you notice we are not directly reshaping it to the final dimensions. We first reshape it to batch x num_tokens x num_heads x head_dim and then we transpose the second and third dimensions to get the result.
+
+The reason is because the matrix is arranged in memory as follows:
+
+```
+Batch0
+
+Token1
+[embeddings]
+
+Token2
+[embeddings]
+
+Token3
+[embeddings]
+
+Token4
+[embeddings]
+```
+
+So we now split every token embedding across the number of heads we want:
+
+```
+Batch0
+
+Token1
+[head1_embeddings, head2_embeddings, head3_embeddings]
+
+Token2
+[head1_embeddings, head2_embeddings, head3_embeddings]
+
+Token3
+[head1_embeddings, head2_embeddings, head3_embeddings]
+
+Token4
+[head1_embeddings, head2_embeddings, head3_embeddings]
+```
+
+If we tried to reshape it directly to batch x num_heads x num_tokens x head_dim, PyTorch would interpret the matrix as:
+
+```
+Batch
+
+Head0
+
+Token1
+Token2
+...
+
+Head1
+...
+```
+
+But the memory is **not arranged that way**.
+
+The first set of numbers belongs completely to token 1, not to head 1 across all tokens. So the heads would become garbage mixtures of different tokens.
+
+---
+
+## Merging Attention Heads and Output Projection
+
+The final phase of the `MultiHeadAttention` forward pass merges the independent attention heads back into a single unified context tensor for each token. Initially, batched matrix multiplication computes context vectors for each head, resulting in a tensor of dimension `(batch, heads, tokens, head_dim)` (for example, `(2, 12, 4, 64)`). To group the outputs of different heads by token, we transpose the tensor dimensions to `(batch, tokens, heads, head_dim)` (yielding `(2, 4, 12, 64)`). Because this transposition only alters the logical layout indexing (strides) without copying data, we call `.contiguous()` to physically rearrange the data in memory. This contiguity is required before utilizing `.view()`, which flattens the last two dimensions to concatenate the heads into a unified embedding dimension of size `self.d_out` ($12 \times 64 = 768$), producing a shape of `(batch, tokens, d_out)` (yielding `(2, 4, 768)`).
+
+For a single token, this flattening and concatenation process modifies the memory layout as follows:
+
+```text
+Before view() [Independent Attention Heads]:
+Head 1:   [64 values]
+Head 2:   [64 values]
+...
+Head 12:  [64 values]
+
+After view() [Concatenated Context Vector]:
+[ Head 1 (64) | Head 2 (64) | ... | Head 12 (64) ]  --->  768 dimensions
+```
+
+Once the heads are concatenated, the combined representation is passed through a linear projection layer `self.out_proj` of shape `(d_out, d_out)` (representing `nn.Linear(768, 768)`). This projection layer is critical because a direct concatenation simply groups the independent attention outputs adjacent to one another without interaction. The projection adds learnable weights to this step so if for example head one learns grammar, head 2 learns long-range dependencies etc, the projection matrix can learn things like 40% of head 1 + 20% of head 2...
+
+---
+
+## Verifying the Multi-Head Attention Output
+
+The `MultiHeadAttention` class can be used similarly to the `SelfAttention` and `CausalAttention` classes we implemented earlier:
+
+```python
+# Assuming 'inputs' and 'batch' are defined as before:
+torch.manual_seed(123)
+batch_size, context_length, d_in = batch.shape
+d_out = 2
+mha = MultiHeadAttention(d_in, d_out, context_length, 0.0, num_heads=2)
+context_vecs = mha(batch)
+print(context_vecs)
+print("context_vecs.shape:", context_vecs.shape)
+```
+```python
+# Output
+tensor([[[0.3190, 0.4858],
+         [0.2943, 0.3897],
+         [0.2856, 0.3593],
+         [0.2693, 0.3873],
+         [0.2639, 0.3928],
+         [0.2575, 0.4028]],
+
+        [[0.3190, 0.4858],
+         [0.2943, 0.3897],
+         [0.2856, 0.3593],
+         [0.2693, 0.3873],
+         [0.2639, 0.3928],
+         [0.2575, 0.4028]]], grad_fn=<ViewBackward0>)
+context_vecs.shape: torch.Size([2, 6, 2])
+```
+
+We have now implemented the `MultiHeadAttention` class that we will use when we implement and train the LLM. Note that while the code is fully functional, we used relatively small embedding sizes and numbers of attention heads to keep the outputs readable.
+
+For comparison, the smallest GPT-2 model (117 million parameters) has 12 attention heads and a context vector embedding size of 768. The largest GPT-2 model (1.5 billion parameters) has 25 attention heads and a context vector embedding size of 1,600. The embedding sizes of the token inputs and context embeddings are the same in GPT models (d_in = d_out).</script>
+
+  <!-- JS for Sticky Title Scroll, Theme Toggle, & Copy Markdown -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const hero = document.getElementById("blog-hero");
+      const sidebar = document.querySelector(".sidebar-col");
+
+      if (hero && sidebar) {
+        const checkScroll = () => {
+          const heroBottom = hero.getBoundingClientRect().bottom;
+          if (heroBottom <= 0) {
+            sidebar.classList.add("has-scrolled");
+          } else {
+            sidebar.classList.remove("has-scrolled");
+          }
+        };
+
+        window.addEventListener("scroll", checkScroll);
+        window.addEventListener("resize", checkScroll);
+        checkScroll();
+      }
+
+      // Copy markdown functionality using script tag content
+      const copyBtn = document.getElementById("copy-markdown-btn");
+      if (copyBtn) {
+        copyBtn.addEventListener("click", () => {
+          const markdownText = document.getElementById("markdown-content").textContent.trim();
+          navigator.clipboard.writeText(markdownText).then(() => {
+            const originalText = copyBtn.textContent;
+            copyBtn.textContent = "Copied!";
+            copyBtn.style.borderColor = "var(--color-1)";
+            copyBtn.style.color = "var(--color-1)";
+            setTimeout(() => {
+              copyBtn.textContent = originalText;
+              copyBtn.style.borderColor = "";
+              copyBtn.style.color = "";
+            }, 2000);
+          }).catch(err => {
+            console.error('Failed to copy markdown: ', err);
+            alert("Could not copy markdown to clipboard automatically.");
+          });
+        });
+      }
+
+      // Light/Dark Theme Toggle Logic
+      const themeToggle = document.getElementById("theme-toggle");
+      if (themeToggle) {
+        const currentTheme = localStorage.getItem("theme") || "light";
+
+        if (currentTheme === "dark") {
+          updateThemeIcon(themeToggle, "dark");
+        }
+
+        themeToggle.addEventListener("click", function (e) {
+          e.preventDefault();
+          document.body.classList.toggle("dark-mode");
+          const theme = document.body.classList.contains("dark-mode") ? "dark" : "light";
+          localStorage.setItem("theme", theme);
+          updateThemeIcon(themeToggle, theme);
+        });
+      }
+
+      function updateThemeIcon(btn, theme) {
+        const svg = btn.querySelector(".theme-toggle-icon");
+        if (!svg) return;
+        if (theme === "dark") {
+          svg.innerHTML = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`;
+        } else {
+          svg.innerHTML = `
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          `;
+        }
+      }
+    });
+  </script>
+</body>
+
+</html>
