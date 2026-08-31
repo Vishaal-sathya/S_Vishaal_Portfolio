@@ -92,7 +92,7 @@ The website utilizes a clean grid system built on standard grid blocks and respo
 *   **Layout Sections:** Each key section uses the `.target-section` class which coordinates with JavaScript ScrollSpy to dynamically highlight current positions in the sticky navigation menu.
 
 ### 4.2 Structural Breakdowns
-1.  **Intro Hero:** Implements a full-width background photo (`images/intro-bg.jpg`), placing text left-aligned inside a 12-column grid. Quick social handles float on the bottom left.
+1.  **Intro Hero:** Implements a full-width background photo (`images/intro-bg.png`), placing text left-aligned inside a 12-column grid. Quick social handles float on the bottom left.
 2.  **Skills Grid:** Arranged in a responsive 4-column flex layout (`.skills-grid`) containing 8 cards: Agentic AI, LLM & RAG Systems, FastAPI, DataBricks, PyTorch, Python, Power BI, and SQL.
 3.  **Experience Row:** Uses `.experience-wrapper` to divide screen real estate:
     *   **Left Column (500px fixed width):** Captivating workplace audit snapshot utilizing `glightbox`.
