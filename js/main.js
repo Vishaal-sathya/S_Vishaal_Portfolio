@@ -22,13 +22,20 @@
             html.classList.remove('ss-preload');
             html.classList.add('ss-loaded');
             
-            preloader.addEventListener('transitionend', function afterTransition(e) {
-                if (e.target.matches('#preloader'))  {
-                    siteBody.classList.add('ss-show');
-                    e.target.style.display = 'none';
-                    preloader.removeEventListener(e.type, afterTransition);
+            function hidePreloader() {
+                siteBody.classList.add('ss-show');
+                preloader.style.display = 'none';
+                preloader.removeEventListener('transitionend', afterTransition);
+            }
+
+            function afterTransition(e) {
+                if (e.target.matches('#preloader')) {
+                    hidePreloader();
                 }
-            });
+            }
+
+            preloader.addEventListener('transitionend', afterTransition);
+            setTimeout(hidePreloader, 600);
         });
 
     }; // end ssPreloader
@@ -143,10 +150,13 @@
                 * sectionId variable we are getting while looping through sections as 
                 * an selector
                 */
-                if (scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) {
-                    document.querySelector('.s-header__nav a[href*=' + sectionId + ']').parentNode.classList.add('current');
-                } else {
-                    document.querySelector('.s-header__nav a[href*=' + sectionId + ']').parentNode.classList.remove('current');
+                const activeLink = document.querySelector('.s-header__nav a[href*=' + sectionId + ']');
+                if (activeLink && activeLink.parentNode) {
+                    if (scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) {
+                        activeLink.parentNode.classList.add('current');
+                    } else {
+                        activeLink.parentNode.classList.remove('current');
+                    }
                 }
             });
         }
